@@ -1,2 +1,9 @@
 auto_now  -- will give the update date of profile
 auto_now_add -- gives you when the object is created
+
+delete git branch 
+git branch -d add(branch name)
+select branch 
+git checkout main(branch name)
+merge two branch
+select main branch and write(git merge add(branch name)) -- you want to merge to the main one 
