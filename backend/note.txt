@@ -1,0 +1,2 @@
+auto_now  -- will give the update date of profile
+auto_now_add -- gives you when the object is created
