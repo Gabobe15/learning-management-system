@@ -1,4 +1,4 @@
-from django.contrib import admin 
+from django.contrib import admin # type: ignore
 from userauths.models import User, Profile
 
 class ProfileAdmin(admin.ModelAdmin):

@@ -8,10 +8,10 @@ class User(AbstractUser):
     username = models.CharField(unique=True, max_length=100)
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=100)
-    otp = models.CharField(unique=True, max_length=15)
+    otp = models.CharField(max_length=15, blank=True, null=True)
     
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'full_name']
+    REQUIRED_FIELDS = ['username']
     
     def __str__(self):
         return self.email

@@ -7,3 +7,7 @@ select branch
 git checkout main(branch name)
 merge two branch
 select main branch and write(git merge add(branch name)) -- you want to merge to the main one 
+
+
+RetrieveAPIView - returns one items
+ListAPIView - returns more than one item

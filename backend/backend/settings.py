@@ -50,8 +50,8 @@ INSTALLED_APPS = [
     'userauths',
     
     #third party apps
-    'corsheaders',
     'rest_framework',
+    'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
     
 ]
