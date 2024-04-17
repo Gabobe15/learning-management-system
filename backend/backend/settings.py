@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from datetime import timedelta
-from environ import Env
+from environs import Env
 env = Env()
 env.read_env()
 
