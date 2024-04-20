@@ -1,4 +1,3 @@
-import React from 'react'
 import Sidebar from './Partials/Sidebar'
 import Header from './Partials/Header'
 

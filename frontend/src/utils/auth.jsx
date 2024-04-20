@@ -6,15 +6,15 @@ import Cookie from 'js-cookie';
 
 export const login = async (email, password) => {
 	try {
-		const { data, status } = await axios.post(`user/token`, {
+		const { data, status } = await axios.post(`user/token/`, {
 			email,
 			password,
 		});
 
 		if (status === 200) {
 			setAuthUser(data.access, data.refresh);
-			alert('Login Successful');
 		}
+		return { data, error: null };
 	} catch (error) {
 		return {
 			data: null,
@@ -32,12 +32,11 @@ export const register = async (full_name, email, password, password2) => {
 			password2,
 		});
 		await login(email, password);
-		alert('Registration successful');
 		return { data, error: null };
 	} catch (error) {
 		return {
 			data: null,
-			error: error.response.data?.detail || 'Something went wrong',
+			error: `${error.response.data?.email}` || 'Something went wrong',
 		};
 	}
 };
@@ -86,7 +85,7 @@ export const setAuthUser = (access_token, refresh_token) => {
 
 export const getRefreshedToken = async () => {
 	const refresh_token = Cookie.get('refresh_token');
-	const response = await axios.post(`token/refresh`, {
+	const response = await axios.post(`token/refresh/`, {
 		refresh: refresh_token,
 	});
 	return response.data;

@@ -1,8 +1,32 @@
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
-import { Link } from 'react-router-dom';
+import apiInstance from '../../utils/axios';
+import { useState, useEffect } from 'react';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { register } from '../../utils/auth';
 
 function Register() {
+	const navigate = useNavigate();
+	const [fullname, setFullName] = useState('');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [password2, setPassword2] = useState('');
+	const [isLoading, setIsLoading] = useState(false);
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setIsLoading(true);
+		const { error } = await register(fullname, email, password, password2);
+		if (error) {
+			alert(error);
+			setIsLoading(false);
+		} else {
+			setIsLoading(false);
+			alert('registration successful');
+			navigate('/');
+		}
+	};
+
 	return (
 		<>
 			<BaseHeader />
@@ -25,7 +49,11 @@ function Register() {
 									</span>
 								</div>
 								{/* Form */}
-								<form className="needs-validation" noValidate="">
+								<form
+									className="needs-validation"
+									noValidate=""
+									onSubmit={handleSubmit}
+								>
 									{/* Username */}
 									<div className="mb-3">
 										<label htmlFor="email" className="form-label">
@@ -34,6 +62,7 @@ function Register() {
 										<input
 											type="text"
 											id="full_name"
+											onChange={(e) => setFullName(e.target.value)}
 											className="form-control"
 											name="full_name"
 											placeholder="John Doe"
@@ -48,6 +77,7 @@ function Register() {
 											type="email"
 											id="email"
 											className="form-control"
+											onChange={(e) => setEmail(e.target.value)}
 											name="email"
 											placeholder="johndoe@gmail.com"
 											required=""
@@ -63,6 +93,7 @@ function Register() {
 											type="password"
 											id="password"
 											className="form-control"
+											onChange={(e) => setPassword(e.target.value)}
 											name="password"
 											placeholder="**************"
 											required=""
@@ -74,8 +105,9 @@ function Register() {
 										</label>
 										<input
 											type="password"
-											id="password"
+											id="password2"
 											className="form-control"
+											onChange={(e) => setPassword2(e.target.value)}
 											name="password"
 											placeholder="**************"
 											required=""
@@ -83,9 +115,20 @@ function Register() {
 									</div>
 									<div>
 										<div className="d-grid">
-											<button type="submit" className="btn btn-primary">
-												Sign Up <i className="fas fa-user-plus"></i>
-											</button>
+											{isLoading === true && (
+												<button
+													type="submit"
+													disabled
+													className="btn btn-primary"
+												>
+													Processing <i className="fas fa-spinner fa-spin"></i>
+												</button>
+											)}
+											{isLoading === false && (
+												<button type="submit" className="btn btn-primary">
+													Sign Up <i className="fas fa-user-plus"></i>
+												</button>
+											)}
 										</div>
 									</div>
 								</form>
