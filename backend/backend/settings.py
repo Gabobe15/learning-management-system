@@ -170,7 +170,7 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587  # Typically 587 for TLS or 465 for SSL
 EMAIL_HOST_USER = "9f23fac4-17d8-4fa6-b9f8-018eb03aef31"
 EMAIL_HOST_PASSWORD = "581e8ee3-5505-486f-8b0e-b48bf34c9dbb"
-DEFAULT_FROM_EMAIL = 'hirolacollege@gmail.com'
+FROM_EMAIL = 'samahacollege@gmail.com'
 
 DOMAIN = env("DOMAIN")
 

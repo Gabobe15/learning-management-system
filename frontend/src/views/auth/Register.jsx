@@ -1,8 +1,8 @@
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
-import apiInstance from '../../utils/axios';
-import { useState, useEffect } from 'react';
-import { NavLink, useNavigate, Link } from 'react-router-dom';
+// import apiInstance from '../../utils/axios';
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { register } from '../../utils/auth';
 
 function Register() {

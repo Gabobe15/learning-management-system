@@ -45,16 +45,16 @@ export const logout = () => {
 	Cookie.remove('access_token');
 	Cookie.remove('refresh_token');
 	useAuthStore.getState().setUser(null);
-	alert('You have been logged out');
 };
 
 export const setUser = async () => {
 	const access_token = Cookie.get('access_token');
 	const refresh_token = Cookie.get('refresh_token');
-
+	// if token expired
 	if (!access_token || !refresh_token) {
 		return;
 	}
+	// generate  new access & refresh token
 	if (isAccessTokenExpired(access_token)) {
 		const response = getRefreshedToken(refresh_token);
 		setAuthUser(response.access, response.refresh);
@@ -65,11 +65,13 @@ export const setUser = async () => {
 
 export const setAuthUser = (access_token, refresh_token) => {
 	Cookie.set('access_token', access_token, {
+		// expireafter 1 day
 		expires: 1,
 		secure: true,
 	});
 
 	Cookie.set('refresh_token', refresh_token, {
+		// expireafter 7 days
 		expires: 7,
 		secure: true,
 	});
@@ -94,6 +96,7 @@ export const getRefreshedToken = async () => {
 export const isAccessTokenExpired = (access_token) => {
 	try {
 		const decodeToken = jwt_decode(access_token);
+		// check if the token is expired 
 		return decodeToken.exp < Date.now() / 1000;
 	} catch (error) {
 		console.log(error);

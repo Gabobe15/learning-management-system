@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import apiInstance from '../../utils/axios';
@@ -8,6 +8,7 @@ function CreateNewPassword() {
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
+
 	const navigate = useNavigate();
 	const [searchParam] = useSearchParams();
 
@@ -34,8 +35,8 @@ function CreateNewPassword() {
 					.then((res) => {
 						console.log(res.data);
 						setIsLoading(false);
-						navigate('/login/')
 						alert(res.data.message);
+						navigate('/login/');
 					});
 			} catch (error) {
 				console.log(error);
@@ -105,7 +106,11 @@ function CreateNewPassword() {
 									<div>
 										<div className="d-grid">
 											{isLoading === true && (
-												<button type="submit" className="btn btn-primary">
+												<button
+													disabled
+													type="submit"
+													className="btn btn-primary"
+												>
 													Processing
 													<i className="fas fa-spinner fa-spin"></i>
 												</button>

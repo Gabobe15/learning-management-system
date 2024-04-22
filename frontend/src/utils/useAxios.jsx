@@ -25,3 +25,5 @@ const useAxios = () => {
 };
 
 export default useAxios;
+
+//when make call to private route using useAxios it will pass all information to headers

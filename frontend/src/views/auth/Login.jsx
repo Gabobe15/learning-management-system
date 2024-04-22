@@ -14,6 +14,7 @@ function Login() {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setIsLoading(true);
+		// make a call to backend and get cookie 
 		const { error } = await login(email, password);
 		if (error) {
 			setIsLoading(false);

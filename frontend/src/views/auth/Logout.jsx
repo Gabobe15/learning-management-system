@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 function Logout() {
 	useEffect(() => {
 		logout();
-    alert('You have logged out successfully.')
+		// alert('You have been logged out successfully.')
 	}, []);
 	return (
 		<>
@@ -29,13 +29,18 @@ function Logout() {
 								</div>
 								<form className="needs-validation mt-5" noValidate="">
 									<div className="d-grid d-flex">
-										<Link to={'/login/'}
+										<Link
+											to={'/login/'}
 											type="submit"
 											className="btn btn-primary me-2 w-100"
 										>
 											Login <i className="fas fa-sign-in-alt"></i>
 										</Link>
-										<Link to={'/register/'} type="submit" className="btn btn-primary w-100">
+										<Link
+											to={'/register/'}
+											type="submit"
+											className="btn btn-primary w-100"
+										>
 											Register <i className="fas fa-user-plus"></i>
 										</Link>
 									</div>

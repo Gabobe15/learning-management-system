@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import apiInstance from '../../utils/axios';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 
 function ForgotPassword() {
 	const [email, setEmail] = useState('');
