@@ -272,7 +272,7 @@ class CartOrderItem(models.Model):
         ordering = ['-date']
     
     def order_id(self):
-        return f"Order ID #{self.order.oid}"
+        return f"Order ID #{self.order.oid}" # this does not need to be serialized it is going to the admin same with payment_status
     
     def payment_status(self):
         return f"{self.order.payment_status}"
