@@ -1,6 +1,16 @@
 auto_now  -- will give the update date of profile
 auto_now_add -- gives you when the object is created
 
+create virtual env
+python -m venv env(virtual environment name)
+activate 
+cd env(virtual environment name)
+Scripts/activate
+deactivate environment 
+deactivate
+
+
+
 delete git branch 
 git branch -d add(branch name)
 select branch 

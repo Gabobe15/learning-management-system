@@ -69,7 +69,7 @@ class Teacher(models.Model):
         return self.full_name
     
     def students(self):
-        return CartOderItem.objects.filter(teacher=self) #get all students of teacher
+        return CartOrderItem.objects.filter(teacher=self) #get all students of teacher
     
     def courses(self):
         return Course.objects.filter(teacher=self) #total courses of a teacher
@@ -81,7 +81,7 @@ class Category(models.Model):
     title = models.CharField(max_length=100)
     image = models.FileField(upload_to='course-file', default='category.jpg', null=True, blank=True)
     slug = models.SlugField(unique=True, null=True, blank=True)
-    
+    active = models.BooleanField(default=True)
     class Meta:
         verbose_name_plural = 'Category'
         ordering = ['title'] #acc / dec(['-title']) we use -ve sign before to indicate it is descending order
@@ -90,7 +90,7 @@ class Category(models.Model):
         return self.title 
     
     def course_count(self):
-        return Course.object.filter(category=self) #count course category
+        return Course.objects.filter(category=self) #count course category
     
     def save(self, *args, **kwargs): #if slug field is empty use the title as slug
         if self.slug == "" or self.slug == None:
@@ -118,9 +118,9 @@ class Course(models.Model):
         return self.title 
     
     def save(self, *args, **kwargs):
-        if self.slug == "" or self.slug == "None":
+        if self.slug == "" or self.slug == None:
             self.slug = slugify(self.title)
-        super(Category, self).save(*args, **kwargs)
+        super(Course, self).save(*args, **kwargs)
     
     def students(self):
         return EnrolledCourse.objects.filter(course=self)
@@ -223,7 +223,7 @@ class Cart(models.Model):
     tax_fee = models.DecimalField(max_digits=12, decimal_places=2,default=0.00)
     total = models.DecimalField(max_digits=12, decimal_places=2,default=0.00)
     country = models.CharField(max_length=100, null=True, blank=True)
-    cart_id = ShortUUIDField(unique=True, length=6, max_length=20, alphabet='1234567890')
+    cart_id = ShortUUIDField(length=6, max_length=20, alphabet='1234567890')
     date = models.DateTimeField(default=timezone.now)
     
     def __str__(self):
@@ -259,11 +259,12 @@ class CartOrderItem(models.Model):
     order = models.ForeignKey(CartOder, on_delete=models.CASCADE, related_name='orderitem')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='order_item')
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=12, decimal_places=12, default=0.00)
     tax_fee = models.DecimalField(max_digits=12, decimal_places=12, default=0.00)
     total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
     initial_amount = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
     saved = models.DecimalField(max_digits=12,default=0.00, decimal_places=2)
-    coupons = models.ForeignKey('api.Coupon', on_delete=models.SET_NULL, null=True, blank=True)
+    coupons = models.ManyToManyField("api.Coupon", blank=True)
     applied_coupon = models.BooleanField(default=False)
     oid =  ShortUUIDField(unique=True, length=6, max_length=20, alphabet='1234567890')
     date = models.DateTimeField(default=timezone.now)
@@ -386,9 +387,11 @@ class Country(models.Model):
     name = models.CharField(max_length=100)
     tax_rate = models.IntegerField(default=5)
     active = models.BooleanField(default=True)
-    
+    class Meta:
+        verbose_name_plural = 'Country'
     def __str__(self):
         return self.name
+    
     
     
     
