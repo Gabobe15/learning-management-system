@@ -56,7 +56,7 @@ export const setUser = async () => {
 	}
 	// generate  new access & refresh token
 	if (isAccessTokenExpired(access_token)) {
-		const response = getRefreshedToken(refresh_token);
+		const response = getRefreshToken(refresh_token);
 		setAuthUser(response.access, response.refresh);
 	} else {
 		setAuthUser(access_token, refresh_token);
@@ -85,9 +85,9 @@ export const setAuthUser = (access_token, refresh_token) => {
 	useAuthStore.getState().setLoading(false);
 };
 
-export const getRefreshedToken = async () => {
+export const getRefreshToken = async () => {
 	const refresh_token = Cookie.get('refresh_token');
-	const response = await axios.post(`token/refresh/`, {
+	const response = await axios.post(`user/token/refresh/`, {
 		refresh: refresh_token,
 	});
 	return response.data;

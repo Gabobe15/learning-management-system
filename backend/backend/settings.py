@@ -119,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
 
 USE_I18N = True
 
@@ -164,6 +164,15 @@ DOMAIN = env("DOMAIN")
 
 SITE_NAME = env("SITE_NAME")
 
+# Stripe 
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+
+# paypal 
+PAYPAL_CLIENT_ID = env("PAYPAL_CLIENT_ID")
+PAYPAL_SECRET_ID = env("PAYPAL_SECRET_ID")
+
+FRONTEND_SITE_URL = env("FRONTEND_SITE_URL")
+BACKEND_SITE_URL = env("BACKEND_SITE_URL")
 
 
 # Default primary key field type

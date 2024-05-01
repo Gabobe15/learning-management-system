@@ -13,7 +13,7 @@ function CreateNewPassword() {
 	const [searchParam] = useSearchParams();
 
 	const otp = searchParam.get('otp');
-	const uuid64 = searchParam.get('uuid64');
+	const uuidb64 = searchParam.get('uuidb64');
 	const refresh_token = searchParam.get('refresh_token');
 
 	const handleCreatePassword = async (e) => {
@@ -26,7 +26,7 @@ function CreateNewPassword() {
 			const formData = new FormData();
 			formData.append('password', password);
 			formData.append('otp', otp);
-			formData.append('uuid64', uuid64);
+			formData.append('uuidb64', uuidb64);
 			formData.append('refresh_token', refresh_token);
 
 			try {
@@ -43,7 +43,7 @@ function CreateNewPassword() {
 				setIsLoading(false);
 			}
 		}
-	};
+	}
 
 	return (
 		<>
