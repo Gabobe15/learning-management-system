@@ -4,8 +4,20 @@ import { Link } from 'react-router-dom';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 
+// sweet alert
+import Swal from 'sweetalert2';
+
+// custom made toast 
+import Toast from '../plugin/Toast';
+
 // api endpoints
 import useAxios from '../../utils/useAxios';
+
+// random cartId
+import CartId from '../plugin/CartId';
+
+// getting location with Geolocation
+import GetCurrentAddress from '../plugin/UserCountry';
 
 // to get paramater in url
 import { useParams } from 'react-router-dom';
@@ -13,7 +25,13 @@ import { useParams } from 'react-router-dom';
 // moment - for date
 import moment from 'moment';
 
+// user_id
+import UserData from '../plugin/UserData';
+
 function CourseDetail() {
+	const country = GetCurrentAddress()?.country;
+	const userId = UserData()?.user_id;
+	// console.log(userId);
 	const params = useParams();
 	const [course, setCourse] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -34,8 +52,6 @@ function CourseDetail() {
 		fetchCourse();
 	}, []);
 
-	console.log(course);
-
 	const addToCart = async (courseId, userId, price, country, cartId) => {
 		setAddToCartBtn('Adding To Cart');
 
@@ -54,6 +70,15 @@ function CourseDetail() {
 				.then((res) => {
 					console.log(res.data);
 					setAddToCartBtn('Added To Cart');
+					// Swal.fire({
+					// 	icon: 'success',
+					// 	title: 'Added To Cart',
+					// 	text: 'Thanks for adding to cart',
+					// });
+					Toast().fire({
+						title: 'Add To Cart',
+						icon: 'success',
+					})
 				});
 		} catch (error) {
 			console.log(error);
@@ -1327,10 +1352,10 @@ function CourseDetail() {
 																	onClick={() =>
 																		addToCart(
 																			course.id,
-																			1,
+																			userId,
 																			course.price,
-																			'Kenya',
-																			'2019'
+																			country,
+																			CartId()
 																		)
 																	}
 																>
@@ -1370,8 +1395,8 @@ function CourseDetail() {
 																		)
 																	}
 																>
-																	<i className="fas fa-spinner fa-spin"></i> Adding
-																	To Cart
+																	<i className="fas fa-spinner fa-spin"></i>{' '}
+																	Adding To Cart
 																</button>
 															)}
 															<Link

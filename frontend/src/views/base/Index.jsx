@@ -31,7 +31,7 @@ function Index() {
 	useEffect(() => {
 		fetchCourse();
 	}, []);
-	console.log(courses);
+	// console.log(courses);
 	return (
 		<>
 			<BaseHeader />

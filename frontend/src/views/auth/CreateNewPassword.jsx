@@ -3,6 +3,7 @@ import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import apiInstance from '../../utils/axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import Toast from '../plugin/Toast';
 
 function CreateNewPassword() {
 	const [password, setPassword] = useState('');
@@ -20,7 +21,10 @@ function CreateNewPassword() {
 		e.preventDefault();
 		setIsLoading(true);
 		if (confirmPassword !== password) {
-			alert('Password does not match');
+			Toast().fire({
+				title: 'Password does not match',
+				icon: 'warning',
+			});
 			return;
 		} else {
 			const formData = new FormData();
@@ -35,7 +39,10 @@ function CreateNewPassword() {
 					.then((res) => {
 						console.log(res.data);
 						setIsLoading(false);
-						alert(res.data.message);
+						Toast().fire({
+							title: res.data.message,
+							icon: 'warning',
+						});
 						navigate('/login/');
 					});
 			} catch (error) {

@@ -4,6 +4,7 @@ import BaseFooter from '../partials/BaseFooter';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register } from '../../utils/auth';
+import Toast from '../plugin/Toast';
 
 function Register() {
 	const navigate = useNavigate();
@@ -18,11 +19,17 @@ function Register() {
 		setIsLoading(true);
 		const { error } = await register(fullname, email, password, password2);
 		if (error) {
-			alert(error);
+			Toast().fire({
+				title: error,
+				icon: 'error',
+			});
 			setIsLoading(false);
 		} else {
 			setIsLoading(false);
-			alert('registration successful');
+				Toast().fire({
+					title: 'registration successful',
+					icon: 'success',
+				});
 			navigate('/');
 		}
 	};

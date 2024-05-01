@@ -7,7 +7,6 @@ import { Link } from 'react-router-dom';
 function Logout() {
 	useEffect(() => {
 		logout();
-		// alert('You have been logged out successfully.')
 	}, []);
 	return (
 		<>

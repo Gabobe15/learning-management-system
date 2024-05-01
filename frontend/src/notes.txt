@@ -1,0 +1,9 @@
+import Swal from 'sweet-alert'
+
+instead of alert you can use Swal
+things you can pass --- 'success' or 'error'or 'warning',
+Swal.fire({
+    icon: 'success'
+    title: 'Added To Cart',
+    text: 'Thanks for adding to Cart'
+})

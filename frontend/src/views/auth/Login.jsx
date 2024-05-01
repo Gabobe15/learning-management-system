@@ -4,6 +4,7 @@ import { login } from '../../utils/auth';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import { Link, useNavigate } from 'react-router-dom';
+import Toast from '../plugin/Toast';
 
 function Login() {
 	const navigate = useNavigate();
@@ -18,7 +19,11 @@ function Login() {
 		const { error } = await login(email, password);
 		if (error) {
 			setIsLoading(false);
-			alert(error);
+			Toast().fire({
+				title: error,
+				icon: 'error',
+			});
+			
 		} else {
 			navigate('/');
 			setIsLoading(false);
