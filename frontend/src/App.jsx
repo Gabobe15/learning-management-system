@@ -1,4 +1,5 @@
 import { Route, Routes, BrowserRouter } from 'react-router-dom';
+import { useState, useEffect} from 'react';
 // import PrivateRoute from './layouts/PrivateRoute';
 import MainWrapper from './layouts/MainWrapper';
 import {
@@ -11,24 +12,44 @@ import {
 
 import Index from './views/base/Index';
 import CourseDetail from './views/base/CourseDetail';
+import Cart from './views/base/Cart';
+import { CartContext } from './views/plugin/Context';
+import apiInstance from './utils/axios';
+import CartId from './views/plugin/CartId';
 
 function App() {
-	return (
-		<BrowserRouter>
-			<MainWrapper>
-				<Routes>
-					<Route path="/register/" element={<Register />} />
-					<Route path="/login/" element={<Login />} />
-					<Route path="/logout/" element={<Logout />} />
-					<Route path="/forgot-password/" element={<ForgotPassword />} />
-					<Route path="/create-new-password/" element={<CreateNewPassword />} />
+	const [cartCount, setCartCount] = useState(0);
 
-					{/* Base routes  */}
-					<Route path="/" element={<Index />} />
-					<Route path="/course-detail/:slug/" element={<CourseDetail />} />
-				</Routes>
-			</MainWrapper>
-		</BrowserRouter>
+	useEffect(() => {
+		apiInstance
+			.get(`course/cart-list/${CartId()}`)
+			.then((res) => setCartCount(res.data?.length));
+	}, []);
+
+	console.log(cartCount);
+
+	return (
+		<CartContext.Provider value={[cartCount, setCartCount]}>
+			<BrowserRouter>
+				<MainWrapper>
+					<Routes>
+						<Route path="/register/" element={<Register />} />
+						<Route path="/login/" element={<Login />} />
+						<Route path="/logout/" element={<Logout />} />
+						<Route path="/forgot-password/" element={<ForgotPassword />} />
+						<Route
+							path="/create-new-password/"
+							element={<CreateNewPassword />}
+						/>
+
+						{/* Base routes  */}
+						<Route path="/" element={<Index />} />
+						<Route path="/course-detail/:slug/" element={<CourseDetail />} />
+						<Route path="/cart/" element={<Cart />} />
+					</Routes>
+				</MainWrapper>
+			</BrowserRouter>
+		</CartContext.Provider>
 	);
 }
 

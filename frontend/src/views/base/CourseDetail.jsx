@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 
-// sweet alert
-import Swal from 'sweetalert2';
+import { CartContext } from '../plugin/Context';
 
-// custom made toast 
+// sweet alert
+// import Swal from 'sweetalert2';
+
+// custom made toast
 import Toast from '../plugin/Toast';
 
 // api endpoints
@@ -27,8 +29,10 @@ import moment from 'moment';
 
 // user_id
 import UserData from '../plugin/UserData';
+import apiInstance from '../../utils/axios';
 
 function CourseDetail() {
+	const [cartCount, setCartCount] = useContext(CartContext);
 	const country = GetCurrentAddress()?.country;
 	const userId = UserData()?.user_id;
 	// console.log(userId);
@@ -78,7 +82,12 @@ function CourseDetail() {
 					Toast().fire({
 						title: 'Add To Cart',
 						icon: 'success',
-					})
+					});
+
+					// set cart count after adding to cart -- give me the updated cart count
+					apiInstance
+						.get(`course/cart-list/${CartId()}`)
+						.then((res) => setCartCount(res.data?.length));
 				});
 		} catch (error) {
 			console.log(error);
