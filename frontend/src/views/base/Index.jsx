@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import { Link } from 'react-router-dom';
@@ -10,9 +10,25 @@ import 'react-rater/lib/react-rater.css';
 // to get apiendpoints
 import useAxios from '../../utils/useAxios';
 
+import CartId from '../plugin/CartId';
+import UserData from '../plugin/UserData';
+import GetCurrentAddress from '../plugin/UserCountry';
+
+import { CartContext } from '../plugin/Context';
+import Toast from '../plugin/Toast';
+import apiInstance from '../../utils/axios';
+
 function Index() {
 	const [courses, setCourses] = useState([]);
 	const [isLoading, setIsloading] = useState(true);
+
+	
+	const country = GetCurrentAddress()?.country;
+	const userId = UserData()?.user_id;
+	const cartId = CartId();
+
+	const [cartCount, setCartCount] = useContext(CartContext);
+
 
 	const fetchCourse = async () => {
 		setIsloading(true);
@@ -31,6 +47,41 @@ function Index() {
 	useEffect(() => {
 		fetchCourse();
 	}, []);
+	const addToCart = async (courseId, userId, price, country, cartId) => {
+		// setAddToCartBtn('Adding To Cart');
+
+		const formdata = new FormData();
+		// we need key,value --- key the format expected in the backend while value is how we pass it from the frontend
+		formdata.append('course_id', courseId);
+		formdata.append('user_id', userId);
+		formdata.append('price', price);
+		formdata.append('country_name', country);
+		formdata.append('cart_id', cartId);
+
+		// sending it to backend
+		try {
+			await useAxios()
+				.post(`course/cart/`, formdata)
+				.then((res) => {
+					console.log(res.data);
+					// setAddToCartBtn('Added To Cart');
+
+					Toast().fire({
+						title: 'Add To Cart',
+						icon: 'success',
+					});
+
+					// set cart count after adding to cart -- give me the updated cart count
+					apiInstance
+						.get(`course/cart-list/${CartId()}`)
+						.then((res) => setCartCount(res.data?.length));
+				});
+		} catch (error) {
+			console.log(error);
+			// setAddToCartBtn('Add To Cart');
+		}
+	};
+
 	// console.log(courses);
 	return (
 		<>
@@ -209,9 +260,7 @@ function Index() {
 															<Rater total={5} rating={course.average_rating} />
 														</span>
 													</span>
-													<span className="text-warning">
-														4.5
-													</span>
+													<span className="text-warning">4.5</span>
 													<span className="fs-6 ms-2">
 														({course.reviews?.length} Review
 														{course.reviews?.length > 1 && 's'})
@@ -227,10 +276,18 @@ function Index() {
 													<div className="col-auto">
 														<button
 															type="button"
+															onClick={() => addToCart(
+																course.id,
+																userId,
+																course.price,
+																country,
+																cartId
+															)}
 															className="text-inherit text-decoration-none btn btn-primary me-2"
 														>
 															<i className="fas fa-shopping-cart text-primary text-white" />
 														</button>
+														
 														<Link
 															to={''}
 															className="text-inherit text-decoration-none btn btn-primary"
