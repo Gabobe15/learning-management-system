@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 
-// cartcount data 
+// cartcount data
 import { CartContext } from '../plugin/Context';
 
 import apiInstance from '../../utils/axios';
@@ -12,11 +12,16 @@ import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import Toast from '../plugin/Toast';
 
-
 function Cart() {
 	const [cartCount, setCartCount] = useContext(CartContext);
 	const [cart, setCart] = useState([]);
 	const [cartStats, setCartStats] = useState([]);
+
+	const [bioData, setBioData] = useState({
+		full_name: '',
+		email: '',
+		country: '',
+	});
 
 	const fetchChartItem = async () => {
 		try {
@@ -38,12 +43,12 @@ function Cart() {
 		fetchChartItem();
 	}, []);
 
-    // delete cart function 
+	// delete cart function
 	const cartItemDelete = async (itemId) => {
 		await apiInstance
 			.delete(`course/cart-item-delete/${CartId()}/${itemId}`)
 			.then((res) => {
-                console.log(res.data);
+				console.log(res.data);
 				fetchChartItem();
 				Toast().fire({
 					icon: 'success',
@@ -55,8 +60,14 @@ function Cart() {
 			});
 	};
 
-	console.log(cart);
-	console.log(cartStats);
+	const handleBioDataChange = (e) => {
+		setBioData({
+			...bioData, //whe we start typing we don't want to clear things we had in full_name
+			[e.target.name]: e.target.value, //when we get the target we grab the value.
+		});
+	};
+
+	console.log(bioData);
 
 	return (
 		<>
@@ -173,6 +184,9 @@ function Cart() {
 												className="form-control"
 												id="yourName"
 												placeholder="Name"
+												name="full_name"
+												value={bioData.full_name}
+												onChange={handleBioDataChange}
 											/>
 										</div>
 										{/* Email */}
@@ -185,6 +199,9 @@ function Cart() {
 												className="form-control"
 												id="emailInput"
 												placeholder="Email"
+												name="email"
+												value={bioData.email}
+												onChange={handleBioDataChange}
 											/>
 										</div>
 
@@ -198,6 +215,9 @@ function Cart() {
 												className="form-control"
 												id="mobileNumber"
 												placeholder="Country"
+												name="country"
+												value={bioData.country}
+												onChange={handleBioDataChange}
 											/>
 										</div>
 									</div>
