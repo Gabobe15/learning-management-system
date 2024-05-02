@@ -1,5 +1,5 @@
 import { Route, Routes, BrowserRouter } from 'react-router-dom';
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 // import PrivateRoute from './layouts/PrivateRoute';
 import MainWrapper from './layouts/MainWrapper';
 import {
@@ -13,6 +13,7 @@ import {
 import Index from './views/base/Index';
 import CourseDetail from './views/base/CourseDetail';
 import Cart from './views/base/Cart';
+import Checkout from './views/base/Checkout';
 import { CartContext } from './views/plugin/Context';
 import apiInstance from './utils/axios';
 import CartId from './views/plugin/CartId';
@@ -46,6 +47,7 @@ function App() {
 						<Route path="/" element={<Index />} />
 						<Route path="/course-detail/:slug/" element={<CourseDetail />} />
 						<Route path="/cart/" element={<Cart />} />
+						<Route path="/checkout/:order_oid/" element={<Checkout />} />
 					</Routes>
 				</MainWrapper>
 			</BrowserRouter>

@@ -126,7 +126,26 @@ class CartOrderSerializer(serializers.ModelSerializer):
     order_items = CartOrderItemSerializer(many=True)
     
     class Meta:
-        fields = '__all__'
+        # fields = '__all__' 
+        fields = [
+            "id",
+            "student",
+            "teachers",
+            "sub_total",
+            "tax_fee",
+            "total",
+            "initial_total",
+            "saved",
+            "payment_status",
+            "full_name",
+            "email",
+            "country",
+            "coupons",
+            "stripe_session_id",
+            "oid",
+            "date",
+            "order_items",
+        ]
         model = api_models.CartOrder
         
     def __init__(self, *args, **kwargs):

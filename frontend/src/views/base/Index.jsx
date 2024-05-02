@@ -22,13 +22,11 @@ function Index() {
 	const [courses, setCourses] = useState([]);
 	const [isLoading, setIsloading] = useState(true);
 
-	
 	const country = GetCurrentAddress()?.country;
 	const userId = UserData()?.user_id;
 	const cartId = CartId();
 
 	const [cartCount, setCartCount] = useContext(CartContext);
-
 
 	const fetchCourse = async () => {
 		setIsloading(true);
@@ -48,8 +46,6 @@ function Index() {
 		fetchCourse();
 	}, []);
 	const addToCart = async (courseId, userId, price, country, cartId) => {
-		// setAddToCartBtn('Adding To Cart');
-
 		const formdata = new FormData();
 		// we need key,value --- key the format expected in the backend while value is how we pass it from the frontend
 		formdata.append('course_id', courseId);
@@ -78,7 +74,6 @@ function Index() {
 				});
 		} catch (error) {
 			console.log(error);
-			// setAddToCartBtn('Add To Cart');
 		}
 	};
 
@@ -276,18 +271,20 @@ function Index() {
 													<div className="col-auto">
 														<button
 															type="button"
-															onClick={() => addToCart(
-																course.id,
-																userId,
-																course.price,
-																country,
-																cartId
-															)}
+															onClick={() =>
+																addToCart(
+																	course.id,
+																	userId,
+																	course.price,
+																	country,
+																	cartId
+																)
+															}
 															className="text-inherit text-decoration-none btn btn-primary me-2"
 														>
 															<i className="fas fa-shopping-cart text-primary text-white" />
 														</button>
-														
+
 														<Link
 															to={''}
 															className="text-inherit text-decoration-none btn btn-primary"

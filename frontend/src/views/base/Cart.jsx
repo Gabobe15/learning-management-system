@@ -4,18 +4,24 @@ import { useState, useEffect, useContext } from 'react';
 import { CartContext } from '../plugin/Context';
 
 import apiInstance from '../../utils/axios';
+
+
 import CartId from '../plugin/CartId';
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import Toast from '../plugin/Toast';
+import { userId } from '../../utils/constant';
+
 
 function Cart() {
 	const [cartCount, setCartCount] = useContext(CartContext);
 	const [cart, setCart] = useState([]);
 	const [cartStats, setCartStats] = useState([]);
+
+	const navigate = useNavigate()
 
 	const [bioData, setBioData] = useState({
 		full_name: '',
@@ -67,7 +73,25 @@ function Cart() {
 		});
 	};
 
-	console.log(bioData);
+// create order using ReactJs 
+	const createOrder = async(e) =>{
+		e.preventDefault()
+		const formdata = new FormData()
+		formdata.append('full_name', bioData.full_name )
+		formdata.append('email', bioData.email )
+		formdata.append('cart_id', CartId() )
+		formdata.append('user_id', userId);
+
+		try {
+			
+			await apiInstance.post(`order/create-order/`, formdata).then(res => {
+				console.log(res.data);
+				navigate(`/checkout/${res.data.order_oid}/`);
+			})
+		} catch (error) {
+			console.log(error);
+		}
+	}
 
 	return (
 		<>
@@ -110,7 +134,7 @@ function Cart() {
 
 			<section className="pt-5">
 				<div className="container">
-					<form>
+					<form onSubmit={createOrder}>
 						<div className="row g-4 g-sm-5">
 							{/* Main content START */}
 							<div className="col-lg-8 mb-4 mb-sm-0">
@@ -245,9 +269,9 @@ function Cart() {
 										</li>
 									</ul>
 									<div className="d-grid">
-										<Link to={`/checkout/`} className="btn btn-lg btn-success">
+										<button type='submit' className="btn btn-lg btn-success">
 											Proceed to Checkout
-										</Link>
+										</button>
 									</div>
 									<p className="small mb-0 mt-2 text-center">
 										By proceeding to checkout, you agree to these{' '}

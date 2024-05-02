@@ -4,7 +4,6 @@ import { CartContext } from "../plugin/Context";
 
 function BaseHeader() {
     const [cartCount, setCartCount] = useContext(CartContext)
-    console.log(cartCount);
     return (
         <div>
             <nav className="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">

@@ -323,70 +323,7 @@ class CreateOrderAPIView(generics.CreateAPIView):
         order.total = total_total
         order.save()
 
-        return Response({"message": "Order Created Successfully"}, status=status.HTTP_201_CREATED)
-    
-# class CreateOrderAPIView(generics.CreateAPIView):
-#     serializer_class = api_serializer.CartOrderSerializer
-#     permission_classes = [AllowAny]
-#     queryset = api_models.CartOrder.objects.all()
-    
-#     def create(self, request, *args, **kwargs):
-#         full_name = request.data['full_name']
-#         email = request.data['email']
-#         country = request.data['country']
-#         cart_id = request.data['cart_id']
-#         user_id = request.data['user_id']
-        
-#         if user_id != 0:
-#             user = User.objects.get(id=user_id)
-#         else:
-#             user = None 
-            
-#         cart_items = api_models.Cart.objects.filter(cart_id=cart_id)
-#         try:
-#             total_price = Decimal(0.00)
-#             total_tax = Decimal(0.00)
-#             total_initial_total = Decimal(0.00)
-#             total_total = Decimal(0.00)
-#         except:
-#             print('initial value error')
-        
-#         order = api_models.CartOrder.objects.create(
-#             full_name=full_name,
-#             email=email,
-#             country=country,
-#             student=user
-#         )
-
-#         for c in cart_items:
-#             api_models.CartOrderItem.objects.create(
-#                 order=order, # we are referencing the order object we create above
-#                 course=c.course, # we are getting this from cartorderitem --- anything with c.
-#                 price=c.price,
-#                 tax_fee=c.tax_fee,
-#                 total=c.total,
-#                 initial_total=c.total,
-#                 teacher=c.course.teacher
-#             )
-
-#             #  we are getting data from cart_item loop  
-#             try:  
-#                 total_price += Decimal(c.price)
-#                 total_tax += Decimal(c.tax_fee)
-#                 total_initial_total += Decimal(c.total)
-#                 total_total += Decimal(c.total)
-#             except: 
-#                 print('loop didn`t work')
-            
-#             order.teachers.add(c.course.teacher)  #order.teacher means we are getting this from cartorder and populating it it cartorderitem
-            
-#         order.sub_total = total_price
-#         order.tax_fee = total_tax
-#         order.initial_total = total_initial_total
-#         order.total = total_total
-#         order.save()
-        
-#         return Response({"message": "Order Created Successfully"}, status=status.HTTP_201_CREATED)
+        return Response({"message": "Order Created Successfully", "order_oid":order.oid}, status=status.HTTP_201_CREATED)
     
 class CheckoutAPIView(generics.RetrieveAPIView):
     serializer_class = api_serializer.CartOrderSerializer
@@ -477,7 +414,7 @@ class StripeCheckoutAPIView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         order_oid = self.kwargs['order_oid']
-        order = api_models.CartOder.objects.get(oid=order_oid)
+        order = api_models.CartOrder.objects.get(oid=order_oid)
         
         if not order:
             return Response({"message": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
