@@ -17,6 +17,7 @@ import Checkout from './views/base/Checkout';
 import { CartContext } from './views/plugin/Context';
 import apiInstance from './utils/axios';
 import CartId from './views/plugin/CartId';
+import Success from './views/base/Success';
 
 function App() {
 	const [cartCount, setCartCount] = useState(0);
@@ -48,6 +49,7 @@ function App() {
 						<Route path="/course-detail/:slug/" element={<CourseDetail />} />
 						<Route path="/cart/" element={<Cart />} />
 						<Route path="/checkout/:order_oid/" element={<Checkout />} />
+						<Route path="/payment-success/:order_oid/" element={<Success />} />
 					</Routes>
 				</MainWrapper>
 			</BrowserRouter>

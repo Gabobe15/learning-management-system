@@ -447,7 +447,7 @@ class StripeCheckoutAPIView(generics.CreateAPIView):
         
 
 def get_access_token(content_id, secret_key):
-    token_url = 'https://api.sanbox.paybal.com/v1/auth/token'
+    token_url = 'https://api.sanbox.paypal.com/v1/oauth2/token'
     data = {'grant_type': 'client_credentials'}
     auth = ('client_id', secret_key)
     response = requests.post(token_url, data=data, auth=auth)
@@ -500,12 +500,12 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                                 teacher=o.teacher,
                                 order_item=o,
                             )
-                        return Response({"message": "Payment successful"})
+                        return Response({"message": "Payment Successful"})
                         
                     else:
-                        return Response({"message": "Already paid"})
+                        return Response({"message": "Already Paid"})
                 else:
-                    return Response({"message": "Payment failed."})
+                    return Response({"message": "Payment Failed."})
             else:
                 return Response({"message": "Paypal error occured."})
                 
