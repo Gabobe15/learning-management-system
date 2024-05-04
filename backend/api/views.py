@@ -8,7 +8,7 @@ from api import models as api_models
 
 import random
 # from decimal import Decimal
-from decimal import *
+import decimal
 
 
 
@@ -189,10 +189,10 @@ class CartAPIView(generics.CreateAPIView): #adding item to cart
             cart.course = course 
             cart.user = user 
             cart.price = price 
-            cart.tax_fee = Decimal(price) * Decimal(tax_rate)
+            cart.tax_fee = decimal.Decimal(price) * decimal.Decimal(tax_rate)
             cart.country = country 
             cart.cart_id = cart_id
-            cart.total = Decimal(cart.price) + Decimal(cart.tax_fee)
+            cart.total = decimal.Decimal(cart.price) + decimal.Decimal(cart.tax_fee)
             cart.save()
             
             return Response({'message': 'Cart updated Successfully'}, status=status.HTTP_200_OK)
@@ -203,10 +203,10 @@ class CartAPIView(generics.CreateAPIView): #adding item to cart
             cart.course = course 
             cart.user = user 
             cart.price = price 
-            cart.tax_fee = Decimal(price) * Decimal(tax_rate)
+            cart.tax_fee = decimal.Decimal(price) * decimal.Decimal(tax_rate)
             cart.country = country 
             cart.cart_id = cart_id
-            cart.total = Decimal(cart.price) + Decimal(cart.tax_fee)
+            cart.total = decimal.Decimal(cart.price) + decimal.Decimal(cart.tax_fee)
             cart.save()
             
             return Response({'message': 'Added to Cart Successfully'}, status=status.HTTP_201_CREATED)
@@ -287,10 +287,10 @@ class CreateOrderAPIView(generics.CreateAPIView):
 
         cart_items = api_models.Cart.objects.filter(cart_id=cart_id)
 
-        total_price = Decimal(0.00)
-        total_tax = Decimal(0.00)
-        total_initial_total = Decimal(0.00)
-        total_total = Decimal(0.00)
+        total_price = decimal.Decimal(0.00)
+        total_tax = decimal.Decimal(0.00)
+        total_initial_total = decimal.Decimal(0.00)
+        total_total = decimal.Decimal(0.00)
 
         order = api_models.CartOrder.objects.create(
             full_name=full_name,
@@ -310,10 +310,10 @@ class CreateOrderAPIView(generics.CreateAPIView):
                 teacher=c.course.teacher
             )
 
-            total_price += Decimal(c.price)
-            total_tax += Decimal(c.tax_fee)
-            total_initial_total += Decimal(c.total)
-            total_total += Decimal(c.total)
+            total_price += decimal.Decimal(c.price)
+            total_tax += decimal.Decimal(c.tax_fee)
+            total_initial_total += decimal.Decimal(c.total)
+            total_total += decimal.Decimal(c.total)
 
             order.teachers.add(c.course.teacher)
 

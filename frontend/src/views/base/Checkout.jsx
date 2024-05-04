@@ -12,7 +12,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import Toast from '../plugin/Toast';
-import { userId } from '../../utils/constant';
+import { PAYPAL_CLIENT_ID, userId } from '../../utils/constant';
+
+import {PayPalButtons, PayPalScriptProvider} from '@paypal/react-paypal-js'
 
 function Checkout() {
 	const [order, setOrder] = useState([]);
@@ -20,6 +22,7 @@ function Checkout() {
 	const [coupon, setCoupon] = useState('');
 
 	const param = useParams();
+	const navigate = useNavigate()
 
 	const fetchOrder = async () => {
 		try {
@@ -60,6 +63,13 @@ function Checkout() {
 	useEffect(() => {
 		fetchOrder();
 	}, []);
+
+	// PayPal Payment With React.js
+const initialOptions = {
+     clientId: PAYPAL_CLIENT_ID,
+     currency: "USD",
+     intent: "capture",
+};
 
 	return (
 		<>
@@ -272,15 +282,37 @@ function Checkout() {
 													className="btn btn-lg btn-success mt-2"
 												>
 													{' '}
-													Pay With PayPal
-												</Link>
-												<Link
-													to={`/success/txn_id/`}
-													className="btn btn-lg btn-success mt-2"
-												>
-													{' '}
 													Pay With Stripe
 												</Link>
+												<PayPalScriptProvider options={initialOptions}>
+													<PayPalButtons
+														className="mt-3"
+														createOrder={(data, actions) => {
+															return actions.order.create({
+																purchase_units: [
+																	{
+																		amount: {
+																			currency_code: 'USD',
+																			value: order.total.toString(),
+																		},
+																	},
+																],
+															});
+														}}
+														onApprove={(data, actions) => {
+															return actions.order.capture().then((details) => {
+																const name = details.payer.name.given_name;
+																const status = details.status;
+																const paypal_order_id = data.orderID;
+
+																console.log(status);
+																if (status === 'COMPLETED') {
+																	navigate(`payment-success/${order.oid}/?paypal_order_id=${paypal_order_id}`);
+																}
+															});
+														}}
+													/>
+												</PayPalScriptProvider>
 											</div>
 											<p className="small mb-0 mt-2 text-center">
 												By proceeding to payment, you agree to these{' '}
