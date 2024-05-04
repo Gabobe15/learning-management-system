@@ -18,6 +18,7 @@ import { CartContext } from './views/plugin/Context';
 import apiInstance from './utils/axios';
 import CartId from './views/plugin/CartId';
 import Success from './views/base/Success';
+import Search from './views/base/Search';
 
 function App() {
 	const [cartCount, setCartCount] = useState(0);
@@ -28,7 +29,6 @@ function App() {
 			.then((res) => setCartCount(res.data?.length));
 	}, []);
 
-	console.log(cartCount);
 
 	return (
 		<CartContext.Provider value={[cartCount, setCartCount]}>
@@ -50,6 +50,7 @@ function App() {
 						<Route path="/cart/" element={<Cart />} />
 						<Route path="/checkout/:order_oid/" element={<Checkout />} />
 						<Route path="/payment-success/:order_oid/" element={<Success />} />
+						<Route path="/search/" element={<Search />} />
 					</Routes>
 				</MainWrapper>
 			</BrowserRouter>
