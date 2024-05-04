@@ -14,15 +14,17 @@ import BaseFooter from '../partials/BaseFooter';
 import Toast from '../plugin/Toast';
 import { PAYPAL_CLIENT_ID, userId } from '../../utils/constant';
 
-import {PayPalButtons, PayPalScriptProvider} from '@paypal/react-paypal-js'
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
 
 function Checkout() {
 	const [order, setOrder] = useState([]);
 
 	const [coupon, setCoupon] = useState('');
 
+	const [paymentLoading, setPaymentLoading] = useState(false);
+
 	const param = useParams();
-	const navigate = useNavigate()
+	const navigate = useNavigate();
 
 	const fetchOrder = async () => {
 		try {
@@ -34,43 +36,46 @@ function Checkout() {
 		}
 	};
 
-	const applyCoupon = async() => {
-		const formdata = new FormData()
-		formdata.append('order_oid', order?.oid)
-		formdata.append('coupon_code', coupon)
+	const applyCoupon = async () => {
+		const formdata = new FormData();
+		formdata.append('order_oid', order?.oid);
+		formdata.append('coupon_code', coupon);
 
 		try {
-			await apiInstance.post(`order/coupon`, formdata).then(res => {
-				console.log(res.data)
-				fetchOrder()
-				setCoupon(res.data)
+			await apiInstance.post(`order/coupon`, formdata).then((res) => {
+				console.log(res.data);
+				fetchOrder();
+				setCoupon(res.data);
 				Toast().fire({
 					icon: res.data.icon,
-					title: res.data.message
-				})
-			}
-		)
+					title: res.data.message,
+				});
+			});
 		} catch (error) {
-			if(error.response.data.includes('Coupon matching query does not exi')){
+			if (error.response.data.includes('Coupon matching query does not exi')) {
 				Toast().fire({
 					icon: 'error',
-					title: 'Coupon already applied'
-				})
+					title: 'Coupon already applied',
+				});
 			}
 		}
-	}
+	};
 
 	useEffect(() => {
 		fetchOrder();
 	}, []);
 
 	// PayPal Payment With React.js
-const initialOptions = {
-     clientId: PAYPAL_CLIENT_ID,
-     currency: "USD",
-     intent: "capture",
-};
+	const initialOptions = {
+		clientId: PAYPAL_CLIENT_ID,
+		currency: 'USD',
+		intent: 'capture',
+	};
 
+	const payWithStripe = (e) => {
+		setPaymentLoading(true);
+		e.target.form.submit();
+	};
 	return (
 		<>
 			<BaseHeader />
@@ -277,13 +282,32 @@ const initialOptions = {
 												</li>
 											</ul>
 											<div className="d-grid">
-												<Link
-													to={`/success/txn_id/`}
-													className="btn btn-lg btn-success mt-2"
+												<form
+													action={`http://127.0.0.1:8000/api/v1/payment/stripe-checkout/${order.oid}/`}
+													className="w-100"
+													method="POST"
 												>
-													{' '}
-													Pay With Stripe
-												</Link>
+													{paymentLoading === true ? (
+														<button
+															type="submit"
+															disabled
+															className="btn btn-lg btn-success mt-2 w-100"
+														>
+															{' '}
+															Processing{' '}
+															<i className="fas fa-spinner fa-spin"></i>
+														</button>
+													) : (
+														<button
+															type="submit"
+															onClick={payWithStripe}
+															className="btn btn-lg btn-success mt-2 w-100"
+														>
+															{' '}
+															Pay With Stripe
+														</button>
+													)}
+												</form>
 												<PayPalScriptProvider options={initialOptions}>
 													<PayPalButtons
 														className="mt-3"
@@ -307,7 +331,9 @@ const initialOptions = {
 
 																console.log(status);
 																if (status === 'COMPLETED') {
-																	navigate(`payment-success/${order.oid}/?paypal_order_id=${paypal_order_id}`);
+																	navigate(
+																		`payment-success/${order.oid}/?paypal_order_id=${paypal_order_id}`
+																	);
 																}
 															});
 														}}
