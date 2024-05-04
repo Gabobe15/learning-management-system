@@ -77,7 +77,18 @@ function Index() {
 		}
 	};
 
-	// console.log(courses);
+	// Pagination
+	const itemPerPage = 3;
+	const [currentPage, setCurrentPage] = useState(1);
+	const indexOfLastItem = currentPage * itemPerPage;
+	const indexOfFirstItem = indexOfLastItem - itemPerPage;
+	const currentItems = courses.slice(indexOfFirstItem, indexOfLastItem); // it is going to show the first and last page 0-4, this mean it consist of four pages
+	const totalPages = Math.ceil(courses.length / itemPerPage); // 10/5 = 2 page
+	const pageNumbers = Array.from(
+		{ length: totalPages },
+		(_, index) => index + 1 // we looping throught page numbers and adding 1 since in js numbers start from 0 , _(is parameter we don't want to use currently but you can name it)
+	);
+
 	return (
 		<>
 			<BaseHeader />
@@ -208,7 +219,7 @@ function Index() {
 					<div className="row">
 						<div className="col-md-12">
 							<div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-								{courses?.map((course, index) => (
+								{currentItems?.map((course, index) => (
 									<div className="col" key={index}>
 										{/* Card */}
 										<div className="card card-hover">
@@ -303,21 +314,41 @@ function Index() {
 					</div>
 					<nav className="d-flex mt-5">
 						<ul className="pagination">
-							<li className="">
-								<button className="page-link me-1">
+							<li
+								className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}
+							>
+								<button
+									className="page-link me-1"
+									onClick={() => setCurrentPage(currentPage - 1)}
+								>
 									<i className="ci-arrow-left me-2" />
 									Previous
 								</button>
 							</li>
 						</ul>
 						<ul className="pagination">
-							<li key={1} className="active">
-								<button className="page-link">1</button>
-							</li>
+							{pageNumbers.map((number) => (
+								<li
+									key={number}
+									className={`page-item ${currentPage === number ? 'active' : ''}`}
+								>
+									<button
+										className="page-link"
+										onClick={() => setCurrentPage(number)}
+									>
+										{number}
+									</button>
+								</li>
+							))}
 						</ul>
 						<ul className="pagination">
-							<li className={`totalPages`}>
-								<button className="page-link ms-1">
+							<li
+								className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}
+							>
+								<button
+									className="page-link ms-1"
+									onClick={() => setCurrentPage(currentPage + 1)}
+								>
 									Next
 									<i className="ci-arrow-right ms-3" />
 								</button>
