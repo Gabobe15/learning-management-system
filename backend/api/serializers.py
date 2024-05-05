@@ -195,9 +195,9 @@ class CouponSerializer(serializers.ModelSerializer):
         model = api_models.Coupon
         fields = '__all__'
         
-class WhishListSerializer(serializers.ModelSerializer):
+class WishListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = api_models.WhishList
+        model = api_models.WishList
         fields = '__all__'
         
 class CountrySerializer(serializers.ModelSerializer):

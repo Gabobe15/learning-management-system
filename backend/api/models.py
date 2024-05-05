@@ -382,7 +382,7 @@ class Coupon(models.Model):
     def __str__(self):
         return self.code
     
-class WhishList(models.Model):
+class WishList(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     

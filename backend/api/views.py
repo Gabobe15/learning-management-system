@@ -506,7 +506,6 @@ class SearchCourseAPIView(generics.ListAPIView):
     def create(self):
         query = self.request.Get.get('query') # we are going to return searching result it matches any course
         return api_models.Course.objects.filter(title__icontains=query, platform_status='Published',teacher_course_status="Published" )
-    
 
 class StudentSummaryAPIView(generics.ListAPIView):
     serializer_class = api_serializer.StudentSummarySerializer
@@ -578,9 +577,19 @@ class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
             api_models.CompletedLesson.objects.create(user=user, course=course, variant_item=variant_item)
             return Response({"message": "Course marked as completed!"})
 
-class StudentNoteCreateAPIView(generics.CreateAPIView):
+class StudentNoteCreateAPIView(generics.ListCreateAPIView):
     serializer_class = api_serializer.NoteSerializer
     permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        enrollment_id = self.kwargs['enrollment_id']
+        
+        user = User.objects.get(id=user_id)
+        enrolled = api_models.EnrolledCourse.objects.get(enrollment_id=enrollment_id)
+        return api_models.Note.objects.filter(user=user, course=enrolled.course)
+
+        
     
     def create(self, request, *args, **kwargs):
         user_id = request.data['user_id']
@@ -631,7 +640,6 @@ class StudentRateCourseCreateAPIView(generics.CreateAPIView):
 
         return Response({"message": "Review created successfully"}, status=status.HTTP_201_CREATED)
     
-
 class StudentRateCourseUpdateAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = api_serializer.ReviewSerializer
     permission_classes = [AllowAny]
@@ -643,3 +651,29 @@ class StudentRateCourseUpdateAPIView(generics.RetrieveUpdateAPIView):
         user = User.objects.get(id=user_id)
         return api_models.Review.objects.get(id=review_id, user=user)
     
+class StudentWishListListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.WishListSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        user = User.objects.get(id=user_id)
+        return api_models.WishList.objects.filter(user=user)
+
+    def create(self, request, *args, **kwargs):
+        user_id = request.data['user_id']
+        course_id = request.data['course_id']
+        
+        user = User.objects.get(id=user_id)
+        course = api_models.Course.objects.get(id=course_id)
+        
+        wishlist = api_models.WishList.objects.filter(user=user, course=course).first()
+        if wishlist:
+            wishlist.delete()
+            return Response({"message": "Wishlist Deleted"}, status=status.HTTP_200_OK)
+            
+        else:
+            api_models.WishList.objects.create(
+                user=user, course=course
+            )
+            return Response({"message": "Wishlist Created"}, status=status.HTTP_201_CREATED)
