@@ -331,44 +331,6 @@ class CheckoutAPIView(generics.RetrieveAPIView):
     queryset = api_models.CartOrder.objects.all()
     lookup_field = 'oid'
     
-    
-# class CouponApplyAPIView(generics.CreateAPIView):
-#     serializer_class = api_serializer.CouponSerializer
-#     permission_classes = [AllowAny]
-    
-#     def create(self, request, *args, **kwargs):
-#         order_oid = request.data['order_oid']
-#         coupon_code = request.data['coupon_code']
-        
-#         order = api_models.CartOrder.objects.get(oid=order_oid)
-#         coupon = api_models.Coupon.objects.get(code=coupon_code)
-        
-#         if coupon:
-#             order_items = api_models.CartOrderItem.objects.filter(order=order, teacher=coupon.teacher)
-#             for i in order_items:
-#                 if not coupon in i.coupons.all():
-#                     discount = i.total * coupon.discount / 100
-                    
-#                     i.total -= discount 
-#                     i.price -= discount
-#                     i.saved += discount 
-#                     i.applied_coupon = True 
-#                     i.coupons.add(coupon) 
-                    
-#                     order.coupons.add(coupon)
-#                     order.total -= discount 
-#                     order.sub_total -= discount 
-#                     order.saved += discount
-                    
-#                     i.save()
-#                     order.save()
-#                     coupon.used_by.add(order.student)
-                    
-#                     return Response({"message": "Coupon found and Activated"}, status=status.HTTP_201_CREATED)
-#                 else:
-#                     return Response({"message": "Coupon already applied"}, status=status.HTTP_200_OK)
-#         else:
-#             return Response({"message": "Coupon not found"}, status=status.HTTP_404_NOT_FOUND)
 
 class CouponApplyAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.CouponSerializer
@@ -543,3 +505,38 @@ class SearchCourseAPIView(generics.ListAPIView):
     def create(self):
         query = self.request.Get.get('query') # we are going to return searching result it matches any course
         return api_models.Course.objects.filter(title__icontains=query, platform_status='Published',teacher_course_status="Published" )
+    
+
+class StudentSummaryAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.StudentSummarySerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        user_id = self.kwargs['user_id'] #we are passing user_id to frontend
+        user = User.objects.get(id=user_id) #filter id by user_id
+        
+        total_courses = api_models.EnrolledCourse.objects.filter(user=user).count() # we are looking at the number of enrolled courses for this user
+        completed_lessons = api_models.CompletedLesson.objects.filter(user=user).count()
+        achieved_certificates = api_models.Certificate.objects.filter(user=user).count()
+        #this is the data we need from completed lessons
+        return [{
+           "total_courses":total_courses,
+           "completed_lessons":completed_lessons,
+           "achieved_certificates ":achieved_certificates,
+        }]
+        
+    def list(self, request, *args, **kwargs):
+        # we are calling queryset function
+        queryset = self.get_queryset() 
+        #calling the serializer class
+        serializer = self.get_serializer(queryset, many=True)  #serialzing queryset
+        return Response(serializer.data)
+    
+class StudentCourseListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.EnrolledCourseSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        user = User.objects.get(id=user_id)
+        return api_models.EnrolledCourse.objects.filter(user=user)
