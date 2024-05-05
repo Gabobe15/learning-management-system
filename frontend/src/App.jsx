@@ -20,6 +20,8 @@ import CartId from './views/plugin/CartId';
 import Success from './views/base/Success';
 import Search from './views/base/Search';
 
+import ChangePassword from './views/student/ChangePassword';
+
 function App() {
 	const [cartCount, setCartCount] = useState(0);
 
@@ -51,6 +53,7 @@ function App() {
 						<Route path="/checkout/:order_oid/" element={<Checkout />} />
 						<Route path="/payment-success/:order_oid/" element={<Success />} />
 						<Route path="/search/" element={<Search />} />
+						<Route path="/student/change-password/" element={<ChangePassword />} />
 					</Routes>
 				</MainWrapper>
 			</BrowserRouter>

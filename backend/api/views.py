@@ -88,8 +88,8 @@ class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
         return user
     
 class PasswordChangeAPIView(generics.CreateAPIView):
-    permission_classes = [AllowAny]
     serializer_class = api_serializer.UserSerializer
+    permission_classes = [AllowAny]
     
     def create(self, request, *args, **kwargs):
         otp = request.data['otp']
@@ -117,7 +117,7 @@ class ChangePasswordAPIView(generics.CreateAPIView):
 
         user = User.objects.get(id=user_id)
         if user is not None:
-            if check_password(old_password, user.password):
+            if check_password(old_password, user.password): #checks if the old password matches the new password
                 user.set_password(new_password)
                 user.save()
                 return Response({"message": "Password changed successfully", "icon": "success"})
@@ -268,6 +268,7 @@ class CartStatsAPIView(generics.RetrieveAPIView):
     
     def calculate_total(self, cart_item):
         return cart_item.total
+
 class CreateOrderAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.CartOrderSerializer
     permission_classes = [AllowAny]
@@ -554,4 +555,26 @@ class StudentCourseDetailAPIView(generics.RetrieveAPIView):
         user = User.objects.get(id=user_id)
         return api_models.EnrolledCourse.objects.get(id=user, enrollment_id=enrollment_id)
         
+
+class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
+    serializer_class = api_serializer.CompletedLessonSerializer
+    permission_classes = [AllowAny]
     
+    def create(self, request, *args, **kwargs):
+        user_id = request.data['user_id']
+        course_id = request.data['course_id']
+        variant_item_id = request.data['variant_item_id']
+        
+        user = User.objects.get(id=user_id)  #id in the backend equals to id sent from the frontend 
+        course = api_models.Course.objects.get(id=course_id)
+        variant_item = api_models.VariantItem.objects.get(variant_item_id=variant_item_id)
+        
+        completed_lesson = api_models.CompletedLesson.objects.filter(user=user, course=course, variant_item=variant_item).first()
+        
+        if completed_lesson:
+            completed_lesson.delete()
+            return Response({"message": "Course marked as not completed!"})
+            
+        else:
+            api_models.CompletedLesson.objects.create(user=user, course=course, variant_item=variant_item)
+            return Response({"message": "Course marked as completed!"})

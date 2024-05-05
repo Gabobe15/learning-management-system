@@ -317,7 +317,7 @@ class EnrolledCourse(models.Model):
         return VariantItem.objects.filter(variant__course=self.course)
     
     def completed_lesson(self):
-        return CompleteLesson.objects.filter(course=self.course, user=self.user) #completed lesson count
+        return CompletedLesson.objects.filter(course=self.course, user=self.user) #completed lesson count
     
     def curriculum(self):
         return Variant.objects.filter(course=self.course) #course we are taking e.g programming
