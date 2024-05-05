@@ -537,6 +537,21 @@ class StudentCourseListAPIView(generics.ListAPIView):
     permission_classes = [AllowAny]
     
     def get_queryset(self):
-        user_id = self.kwargs['user_id']
+        user_id = self.kwargs['user_id'] #passing this to the url
         user = User.objects.get(id=user_id)
         return api_models.EnrolledCourse.objects.filter(user=user)
+    
+class StudentCourseDetailAPIView(generics.RetrieveAPIView):
+    serializer_class = api_serializer.EnrolledCourseSerializer
+    permission_classes = [AllowAny]
+    lookup_field = 'enrollment_id' #instead of looking for enrollment_id in queryset we can still use lookup field to do the same.
+    
+    def get_object(self):
+        # passing this to the url 
+        user_id = self.kwargs['user_id']
+        enrollment_id = self.kwargs['enrollment_id']
+        
+        user = User.objects.get(id=user_id)
+        return api_models.EnrolledCourse.objects.get(id=user, enrollment_id=enrollment_id)
+        
+    
