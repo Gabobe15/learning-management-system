@@ -22,6 +22,11 @@ import Search from './views/base/Search';
 
 import ChangePassword from './views/student/ChangePassword';
 
+// students
+import StudentDashboard from './views/student/Dashboard';
+import StudentCourses from './views/student/Courses';
+import StudentCourseDetail from './views/student/CourseDetail';
+
 function App() {
 	const [cartCount, setCartCount] = useState(0);
 
@@ -30,7 +35,6 @@ function App() {
 			.get(`course/cart-list/${CartId()}`)
 			.then((res) => setCartCount(res.data?.length));
 	}, []);
-
 
 	return (
 		<CartContext.Provider value={[cartCount, setCartCount]}>
@@ -53,7 +57,18 @@ function App() {
 						<Route path="/checkout/:order_oid/" element={<Checkout />} />
 						<Route path="/payment-success/:order_oid/" element={<Success />} />
 						<Route path="/search/" element={<Search />} />
-						<Route path="/student/change-password/" element={<ChangePassword />} />
+						<Route
+							path="/student/change-password/"
+							element={<ChangePassword />}
+						/>
+
+						{/* Student route  */}
+						<Route path="/student/dashboard/" element={<StudentDashboard />} />
+						<Route path="/student/courses/" element={<StudentCourses />} />
+						<Route
+							path="/student/courses/:enrollment_id/"
+							element={<StudentCourseDetail />}
+						/>
 					</Routes>
 				</MainWrapper>
 			</BrowserRouter>
