@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, useRef } from 'react';
 // third party packages
 import { useParams } from 'react-router-dom';
 import ReactPlayer from 'react-player';
@@ -17,7 +17,6 @@ import UserData from '../plugin/UserData';
 
 function CourseDetail() {
 	const [course, setCourse] = useState([]);
-	const param = useParams();
 	const [variantItem, setVariantItem] = useState(null);
 	const [completionPercentage, setCompletionPercentage] = useState(0);
 
@@ -34,6 +33,9 @@ function CourseDetail() {
 	const [questions, setQuestions] = useState([]);
 
 	const [selectedConversation, setSelectedConversation] = useState(null);
+
+	const param = useParams();
+	const lastElementRef = useRef();
 
 	// play lecture model
 	const [show, setShow] = useState(false);
@@ -205,6 +207,42 @@ function CourseDetail() {
 				});
 			});
 	};
+
+	const sendNewMessage = async (e) => {
+		e.preventDefault();
+
+		const formdata = new FormData();
+		formdata.append('course_id', course.course?.id);
+		formdata.append('user_id', UserData()?.user_id);
+		formdata.append('message', createMessage.message);
+		formdata.append('qa_id', selectedConversation?.qa_id);
+
+		useAxios()
+			.post(`student/question-answer-message-create/`, formdata)
+			.then((res) => {
+				console.log(res.data);
+				setSelectedConversation(res.data.question);
+			});
+	};
+
+	useEffect(() => {
+		if (lastElementRef.current) {
+			lastElementRef.current.scrollIntoView({ behavior: 'smooth' });
+		}
+	}, [selectedConversation]);
+
+	const handleSearchQuestion = (e) => {
+		const query = e.target.value.toLowerCase();
+		if (query === '') {
+			fetchCourseDetail();
+		} else {
+			const filtered = questions?.filter((question) => {
+				return question.title.toLowerCase().include(query)
+			})
+			return setQuestions(filtered)
+		}
+	};
+
 	return (
 		<>
 			<BaseHeader />
@@ -578,6 +616,7 @@ function CourseDetail() {
 																					type="search"
 																					placeholder="Search"
 																					aria-label="Search"
+																					onChange={handleSearchQuestion}
 																				/>
 																				<button
 																					className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
@@ -802,7 +841,11 @@ function CourseDetail() {
 											<a href="#">
 												<img
 													className="avatar-img rounded-circle"
-													src={m.profile.image}
+													src={
+														m.profile.image?.startsWith('http://127.0.0.1:8000')
+															? m.profile.image
+															: `http://127.0.0.1:8000${m.profile.image}`
+													}
 													style={{
 														width: '40px',
 														height: '40px',
@@ -839,17 +882,19 @@ function CourseDetail() {
 									</div>
 								</li>
 							))}
+							<div ref={lastElementRef}></div>
 						</ul>
 
-						<form className="w-100 d-flex">
+						<form className="w-100 d-flex" onSubmit={sendNewMessage}>
 							<textarea
 								name="message"
 								className="one form-control pe-4 bg-light w-75"
 								id="autoheighttextarea"
 								rows="2"
 								placeholder="What's your question?"
+								onChange={handleMessageChange}
 							></textarea>
-							<button className="btn btn-primary ms-2 mb-0 w-25" type="button">
+							<button className="btn btn-primary ms-2 mb-0 w-25" type="submit">
 								Post <i className="fas fa-paper-plane"></i>
 							</button>
 						</form>
