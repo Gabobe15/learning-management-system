@@ -171,9 +171,9 @@ function BaseHeader() {
 								placeholder="Search Courses"
 								aria-label="Search Courses"
 							/>
-							<button className="btn btn-outline-success w-50" type="submit">
+							<Link to='/search/' className="btn btn-outline-success w-50" type="submit">
 								Search <i className="fas fa-search"></i>
-							</button>
+							</Link>
 						</form>
 						{isLoggedIn() === true ? (
 							<>

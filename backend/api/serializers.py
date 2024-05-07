@@ -64,6 +64,14 @@ class VariantItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.VariantItem
         fields = '__all__'
+        
+    def __init__(self, *args, **kwargs):
+        super(VariantItemSerializer, self).__init__(*args,**kwargs)
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
         # fields = ["variant","title","description","file","duration","content_duration","preview","variant_item_id","date",
         # ]
         
@@ -72,6 +80,14 @@ class VariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.Variant
         fields = '__all__' 
+        
+    def __init__(self, *args, **kwargs):
+        super(VariantSerializer, self).__init__(*args,**kwargs)
+        request = self.context.get('request')
+        if request and request.method == 'POST':
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
         
 class CategorySerializer(serializers.ModelSerializer):
     class Meta: 
@@ -166,6 +182,14 @@ class CompletedLessonSerializer(serializers.ModelSerializer):
         model = api_models.CompletedLesson
         fields = '__all__'
         
+    def __init__(self, *args, **kwargs):
+        super(CompletedLessonSerializer, self).__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and request.method == "POST":
+            self.Meta.depth = 0
+        else:
+            self.Meta.depth = 3
+        
         # fields = ['id','course','user','variant_item','date',
         # ]  
         
@@ -226,6 +250,8 @@ class EnrolledCourseSerializer(serializers.ModelSerializer):
             self.Meta.depth = 0
         else:
             self.Meta.depth = 3
+            
+            
 class CourseSerializer(serializers.ModelSerializer):
     students = EnrolledCourseSerializer(many=True, required=False, read_only=True) #we expect many student to be in this course
     curriculum = VariantSerializer(many=True, required=False, read_only=True)

@@ -6,6 +6,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
 // internal components
+import Toast from '../plugin/Toast';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import Sidebar from './Partials/Sidebar';
@@ -14,10 +15,22 @@ import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 
 function CourseDetail() {
+	const [course, setCourse] = useState([]);
+	const param = useParams();
+	const [variantItem, setVariantItem] = useState(null);
+	const [completionPercentage, setCompletionPercentage] = useState(0);
+
+	const [markAsCompletedStatus, setMarkAsCompletedStatus] = useState({});
+
+	const [createNote, setCreateNote] = useState({ title: '', note: '' });
+	const [selectedNote, setSelectedNote] = useState(null);
+
+	// play lecture model
 	const [show, setShow] = useState(false);
 	const handleClose = () => setShow(false);
-	const handleShow = () => {
+	const handleShow = (variant_item) => {
 		setShow(true);
+		setVariantItem(variant_item);
 	};
 
 	const [noteShow, setNoteShow] = useState(false);
@@ -32,9 +45,6 @@ function CourseDetail() {
 		setConversationShow(true);
 	};
 
-	const [course, setCourse] = useState([]);
-	const param = useParams();
-
 	const fetchCourseDetail = async () => {
 		useAxios()
 			.get(
@@ -42,15 +52,70 @@ function CourseDetail() {
 			)
 			.then((res) => {
 				setCourse(res.data);
-				console.log(res.data);
+				const percentageCompletion =
+					(res.data.completed_lesson?.length / res.data.lectures?.length) * 100;
+				setCompletionPercentage(percentageCompletion?.toFixed(0));
 			});
 	};
 
-  const handleMarkLessonAsCompleted = () => {}
+	const handleMarkLessonAsCompleted = (variantItemId) => {
+		const key = `lecture_${variantItemId}`;
+		setMarkAsCompletedStatus({
+			...markAsCompletedStatus,
+			[key]: 'Updating',
+		});
+		const formdata = new FormData();
+		formdata.append('user_id', UserData()?.user_id || 0);
+		formdata.append('course_id', course.course?.id);
+		formdata.append('variant_item_id', variantItemId);
+
+		useAxios()
+			.post(`student/course-completed/`, formdata)
+			.then((res) => {
+				fetchCourseDetail();
+				setMarkAsCompletedStatus({
+					...markAsCompletedStatus,
+					[key]: 'Updated',
+				});
+			});
+	};
 
 	useEffect(() => {
 		fetchCourseDetail();
 	}, []);
+
+	const handleChangeNote = (e) => {
+		setCreateNote({
+			...createNote,
+			[e.target.name]: e.target.value,
+		});
+	};
+
+	const handleSubmitCreateNote = async (e) => {
+		const formdata = new FormData();
+		formdata.append('user_id', UserData()?.user_id);
+		formdata.append('enrollment_id', param.enrollment_id);
+		formdata.append('title', createNote.title);
+		formdata.append('note', createNote.note);
+
+		try {
+			await useAxios()
+				.post(
+					`student/course-note/${UserData()?.user_id}/${param.enrollment_id}/`,
+					formdata
+				)
+				.then((res) => {
+					fetchCourseDetail();
+					console.log(res.data);
+					Toast().fire({
+						icon: 'success',
+						title: 'Note created',
+					});
+				});
+		} catch (error) {
+			console.log(error);
+		}
+	};
 
 	return (
 		<>
@@ -179,12 +244,14 @@ function CourseDetail() {
 																	<div
 																		className="progress-bar"
 																		role="progressbar"
-																		style={{ width: `${25}%` }}
-																		aria-valuenow={25}
+																		style={{
+																			width: `${completionPercentage}%`,
+																		}}
+																		aria-valuenow={completionPercentage}
 																		aria-valuemin={0}
 																		aria-valuemax={100}
 																	>
-																		25%
+																		{completionPercentage}%
 																	</div>
 																</div>
 																{/* Item */}
@@ -313,7 +380,9 @@ function CourseDetail() {
 																						/>
 																					</div>
 																					<div className="modal-body">
-																						<form>
+																						<form
+																							onSubmit={handleSubmitCreateNote}
+																						>
 																							<div className="mb-3">
 																								<label
 																									htmlFor="exampleInputEmail1"
@@ -324,6 +393,8 @@ function CourseDetail() {
 																								<input
 																									type="text"
 																									className="form-control"
+																									name="title"
+																									onChange={handleChangeNote}
 																								/>
 																							</div>
 																							<div className="mb-3">
@@ -335,7 +406,7 @@ function CourseDetail() {
 																								</label>
 																								<textarea
 																									className="form-control"
-																									name=""
+																									name="note"
 																									id=""
 																									cols="30"
 																									rows="10"
@@ -365,47 +436,31 @@ function CourseDetail() {
 																</div>
 																<div className="card-body p-0 pt-3">
 																	{/* Note item start */}
-																	<div className="row g-4 p-3">
-																		<div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
-																			<h5>
-																				{' '}
-																				What is Digital Marketing What is
-																				Digital Marketing
-																			</h5>
-																			<p>
-																				Arranging rapturous did believe him all
-																				had supported. Supposing so be resolving
-																				breakfast am or perfectly. It drew a
-																				hill from me. Valley by oh twenty direct
-																				me so. Departure defective arranging
-																				rapturous did believe him all had
-																				supported. Family months lasted simple
-																				set nature vulgar him. Picture for
-																				attempt joy excited ten carried manners
-																				talking how. Family months lasted simple
-																				set nature vulgar him. Picture for
-																				attempt joy excited ten carried manners
-																				talking how.
-																			</p>
-																			{/* Buttons */}
-																			<div className="hstack gap-3 flex-wrap">
-																				<a
-																					onClick={handleNoteShow}
-																					className="btn btn-success mb-0"
-																				>
-																					<i className="bi bi-pencil-square me-2" />{' '}
-																					Edit
-																				</a>
-																				<a
-																					href="#"
-																					className="btn btn-danger mb-0"
-																				>
-																					<i className="bi bi-trash me-2" />{' '}
-																					Delete
-																				</a>
+																	{course?.note?.map((n, index) => (
+																		<div className="row g-4 p-3" key={index}>
+																			<div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
+																				<h5> {n.title}</h5>
+																				<p>{n.note}</p>
+																				{/* Buttons */}
+																				<div className="hstack gap-3 flex-wrap">
+																					<a
+																						onClick={handleNoteShow}
+																						className="btn btn-success mb-0"
+																					>
+																						<i className="bi bi-pencil-square me-2" />{' '}
+																						Edit
+																					</a>
+																					<a
+																						href="#"
+																						className="btn btn-danger mb-0"
+																					>
+																						<i className="bi bi-trash me-2" />{' '}
+																						Delete
+																					</a>
+																				</div>
 																			</div>
 																		</div>
-																	</div>
+																	))}
 																	<hr />
 																</div>
 															</div>
@@ -560,21 +615,20 @@ function CourseDetail() {
 			</section>
 
 			{/* Lecture Modal */}
-			<Modal show={null} size="lg" onHide={null}>
+			<Modal show={show} size="lg" onHide={handleClose}>
 				<Modal.Header closeButton>
-					<Modal.Title>Lesson: Lesson Title</Modal.Title>
+					<Modal.Title>{variantItem?.title}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					<ReactPlayer
-						url={`url-here`}
+						url={variantItem?.file}
 						controls
-						playing
 						width={'100%'}
 						height={'100%'}
 					/>
 				</Modal.Body>
 				<Modal.Footer>
-					<Button variant="secondary" onClick={null}>
+					<Button variant="secondary" onClick={handleClose}>
 						Close
 					</Button>
 				</Modal.Footer>
