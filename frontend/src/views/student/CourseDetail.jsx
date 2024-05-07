@@ -35,8 +35,9 @@ function CourseDetail() {
 
 	const [noteShow, setNoteShow] = useState(false);
 	const handleNoteClose = () => setNoteShow(false);
-	const handleNoteShow = () => {
+	const handleNoteShow = (note) => {
 		setNoteShow(true);
+		setSelectedNote(note);
 	};
 
 	const [ConversationShow, setConversationShow] = useState(false);
@@ -84,7 +85,7 @@ function CourseDetail() {
 		fetchCourseDetail();
 	}, []);
 
-	const handleChangeNote = (e) => {
+	const handleNoteChange = (e) => {
 		setCreateNote({
 			...createNote,
 			[e.target.name]: e.target.value,
@@ -92,6 +93,8 @@ function CourseDetail() {
 	};
 
 	const handleSubmitCreateNote = async (e) => {
+		e.preventDefault();
+
 		const formdata = new FormData();
 		formdata.append('user_id', UserData()?.user_id);
 		formdata.append('enrollment_id', param.enrollment_id);
@@ -115,6 +118,44 @@ function CourseDetail() {
 		} catch (error) {
 			console.log(error);
 		}
+	};
+
+	const handleSubmitEditNote = (e, noteId) => {
+		e.preventDefault();
+		const formdata = new FormData();
+		formdata.append('user_id', UserData()?.user_id);
+		formdata.append('enrollment_id', param.enrollment_id);
+		formdata.append('title', createNote.title || createNote?.title);
+		formdata.append('note', createNote.note || createNote?.note);
+
+		useAxios()
+			.patch(
+				`student/course-note-detail/${UserData()?.user_id}/${param.enrollment_id}/${noteId}/`,
+				formdata
+			)
+			.then((res) => {
+				fetchCourseDetail();
+				console.log(res.data);
+				Toast().fire({
+					icon: 'success',
+					title: 'Note updated',
+				});
+			});
+	};
+
+	const handleDeleteNote = (noteId) => {
+		useAxios()
+			.delete(
+				`student/course-note-detail/${UserData()?.user_id}/${param.enrollment_id}/${noteId}/`
+			)
+			.then((res) => {
+				fetchCourseDetail();
+				console.log(res.data);
+				Toast().fire({
+					icon: 'success',
+					title: 'Note deleted',
+				});
+			});
 	};
 
 	return (
@@ -444,14 +485,16 @@ function CourseDetail() {
 																				{/* Buttons */}
 																				<div className="hstack gap-3 flex-wrap">
 																					<a
-																						onClick={handleNoteShow}
+																						onClick={() => handleNoteShow(n)}
 																						className="btn btn-success mb-0"
 																					>
 																						<i className="bi bi-pencil-square me-2" />{' '}
 																						Edit
 																					</a>
 																					<a
-																						href="#"
+																						onClick={() =>
+																							handleDeleteNote(n.id)
+																						}
 																						className="btn btn-danger mb-0"
 																					>
 																						<i className="bi bi-trash me-2" />{' '}
@@ -461,6 +504,7 @@ function CourseDetail() {
 																			</div>
 																		</div>
 																	))}
+																	{course?.note?.length < 1 && <p className='mt-3 p-3'>No notes</p>}
 																	<hr />
 																</div>
 															</div>
@@ -637,17 +681,18 @@ function CourseDetail() {
 			{/* Note Edit Modal */}
 			<Modal show={noteShow} size="lg" onHide={handleNoteClose}>
 				<Modal.Header closeButton>
-					<Modal.Title>Note: Note Title</Modal.Title>
+					<Modal.Title>Note: {selectedNote?.title}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					<form>
+					<form onSubmit={(e) => handleSubmitEditNote(e, selectedNote?.id)}>
 						<div className="mb-3">
 							<label htmlFor="exampleInputEmail1" className="form-label">
 								Note Title
 							</label>
 							<input
-								defaultValue={null}
+								defaultValue={selectedNote?.title}
 								name="title"
+								onChange={handleNoteChange}
 								type="text"
 								className="form-control"
 							/>
@@ -657,9 +702,9 @@ function CourseDetail() {
 								Note Content
 							</label>
 							<textarea
-								onChange={null}
-								defaultValue={null}
+								defaultValue={selectedNote?.note}
 								name="note"
+								onChange={handleNoteChange}
 								className="form-control"
 								cols="30"
 								rows="10"
@@ -668,7 +713,7 @@ function CourseDetail() {
 						<button
 							type="button"
 							className="btn btn-secondary me-2"
-							onClick={null}
+							onClick={handleNoteClose}
 						>
 							<i className="fas fa-arrow-left"></i> Close
 						</button>
