@@ -89,6 +89,22 @@ function Index() {
 		(_, index) => index + 1 // we looping throught page numbers and adding 1 since in js numbers start from 0 , _(is parameter we don't want to use currently but you can name it)
 	);
 
+	const addToWishlist = (courseId) => {
+		const formdata = new FormData();
+		formdata.append('user_id', UserData()?.user_id);
+		formdata.append('course_id', courseId);
+
+		useAxios()
+			.post(`student/wishlist/${UserData()?.user_id}/`, formdata)
+			.then((res) => {
+				console.log(res.data);
+				Toast().fire({
+					icon: 'success',
+					title: res.data.message,
+				});
+			});
+	};
+
 	return (
 		<>
 			<BaseHeader />
@@ -242,7 +258,10 @@ function Index() {
 													<span className="badge bg-success">
 														{course.language}
 													</span>
-													<a href="#" className="fs-5">
+													<a
+														onClick={() => addToWishlist(course.id)}
+														className="fs-5"
+													>
 														<i className="fas fa-heart text-danger align-middle" />
 													</a>
 												</div>

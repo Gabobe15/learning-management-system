@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 // third party packages
 import { useParams } from 'react-router-dom';
 import ReactPlayer from 'react-player';
@@ -33,6 +33,10 @@ function CourseDetail() {
 	const [questions, setQuestions] = useState([]);
 
 	const [selectedConversation, setSelectedConversation] = useState(null);
+
+	const [createReview, setCreateReview] = useState({ rating: 1, review: '' });
+
+	const [studentReview, setStudentReview] = useState([]);
 
 	const param = useParams();
 	const lastElementRef = useRef();
@@ -71,6 +75,7 @@ function CourseDetail() {
 			.then((res) => {
 				setCourse(res.data);
 				setQuestions(res.data.question_answer);
+				setStudentReview(res.data.review);
 				const percentageCompletion =
 					(res.data.completed_lesson?.length / res.data.lectures?.length) * 100;
 				setCompletionPercentage(percentageCompletion?.toFixed(0));
@@ -127,7 +132,6 @@ function CourseDetail() {
 				)
 				.then((res) => {
 					fetchCourseDetail();
-					console.log(res.data);
 					Toast().fire({
 						icon: 'success',
 						title: 'Note created',
@@ -153,7 +157,6 @@ function CourseDetail() {
 			)
 			.then((res) => {
 				fetchCourseDetail();
-				console.log(res.data);
 				Toast().fire({
 					icon: 'success',
 					title: 'Note updated',
@@ -168,7 +171,6 @@ function CourseDetail() {
 			)
 			.then((res) => {
 				fetchCourseDetail();
-				console.log(res.data);
 				Toast().fire({
 					icon: 'success',
 					title: 'Note deleted',
@@ -200,7 +202,6 @@ function CourseDetail() {
 			.then((res) => {
 				fetchCourseDetail();
 				handleQuestionClose();
-				console.log(res.data);
 				Toast().fire({
 					icon: 'success',
 					title: 'Question sent',
@@ -220,7 +221,6 @@ function CourseDetail() {
 		useAxios()
 			.post(`student/question-answer-message-create/`, formdata)
 			.then((res) => {
-				console.log(res.data);
 				setSelectedConversation(res.data.question);
 			});
 	};
@@ -237,10 +237,58 @@ function CourseDetail() {
 			fetchCourseDetail();
 		} else {
 			const filtered = questions?.filter((question) => {
-				return question.title.toLowerCase().include(query)
-			})
-			return setQuestions(filtered)
+				return question.title.toLowerCase().include(query);
+			});
+			return setQuestions(filtered);
 		}
+	};
+
+	const handleReviewChange = (e) => {
+		setCreateReview({
+			...createReview,
+			[e.target.name]: e.target.value,
+		});
+	};
+
+	const handleCreateReviewSubmit = (e) => {
+		e.preventDefault();
+		const formdata = new FormData();
+		formdata.append('course_id', course.course?.id);
+		formdata.append('user_id', UserData()?.user_id);
+		formdata.append('rating', createReview.rating);
+		formdata.append('review', createReview.review);
+
+		useAxios()
+			.post(`student/rate-course/`, formdata)
+			.then((res) => {
+				fetchCourseDetail();
+				Toast().fire({
+					icon: 'success',
+					title: 'Review created',
+				});
+			});
+	};
+
+	const handleUpdateReviewSubmit = (e) => {
+		e.preventDefault();
+		const formdata = new FormData();
+		formdata.append('course', course.course?.id);
+		formdata.append('user', UserData()?.user_id);
+		formdata.append('rating', createReview.rating || studentReview?.rating);
+		formdata.append('review', createReview.review || studentReview?.review);
+
+		useAxios()
+			.post(
+				`student/review-detail/${UserData()?.user_id}/${studentReview?.id}/`,
+				formdata
+			)
+			.then((res) => {
+				fetchCourseDetail();
+				Toast().fire({
+					icon: 'success',
+					title: 'Review created',
+				});
+			});
 	};
 
 	return (
@@ -520,7 +568,7 @@ function CourseDetail() {
 																									type="text"
 																									className="form-control"
 																									name="title"
-																									onChange={handleChangeNote}
+																									onChange={handleNoteChange}
 																								/>
 																							</div>
 																							<div className="mb-3">
@@ -707,40 +755,123 @@ function CourseDetail() {
 																	{/* Title */}
 																	<h4 className="mb-3 p-3">Leave a Review</h4>
 																	<div className="mt-2">
-																		<form className="row g-3 p-3">
-																			{/* Rating */}
-																			<div className="col-12 bg-light-input">
-																				<select
-																					id="inputState2"
-																					className="form-select js-choice"
-																				>
-																					<option value={1}>★☆☆☆☆ (1/5)</option>
-																					<option value={2}>★★☆☆☆ (2/5)</option>
-																					<option value={3}>★★★☆☆ (3/5)</option>
-																					<option value={4}>★★★★☆ (4/5)</option>
-																					<option value={5}>★★★★★ (5/5)</option>
-																				</select>
-																			</div>
-																			{/* Message */}
-																			<div className="col-12 bg-light-input">
-																				<textarea
-																					className="form-control"
-																					id="exampleFormControlTextarea1"
-																					placeholder="Your review"
-																					rows={3}
-																					defaultValue={''}
-																				/>
-																			</div>
-																			{/* Button */}
-																			<div className="col-12">
-																				<button
-																					type="submit"
-																					className="btn btn-primary mb-0"
-																				>
-																					Post Review
-																				</button>
-																			</div>
-																		</form>
+																		{!studentReview && (
+																			<form
+																				className="row g-3 p-3"
+																				onSubmit={handleCreateReviewSubmit}
+																			>
+																				{/* Rating */}
+																				<div className="col-12 bg-light-input">
+																					<select
+																						id="inputState2"
+																						className="form-select js-choice"
+																						onChange={handleReviewChange}
+																						name="rating"
+																						defaultValue={
+																							studentReview.rating || 0
+																						}
+																					>
+																						<option value={1}>
+																							★☆☆☆☆ (1/5)
+																						</option>
+																						<option value={2}>
+																							★★☆☆☆ (2/5)
+																						</option>
+																						<option value={3}>
+																							★★★☆☆ (3/5)
+																						</option>
+																						<option value={4}>
+																							★★★★☆ (4/5)
+																						</option>
+																						<option value={5}>
+																							★★★★★ (5/5)
+																						</option>
+																					</select>
+																				</div>
+																				{/* Message */}
+																				<div className="col-12 bg-light-input">
+																					<textarea
+																						className="form-control"
+																						id="exampleFormControlTextarea1"
+																						placeholder="Your review"
+																						rows={3}
+																						onChange={handleReviewChange}
+																						name="review"
+																						defaultValue={
+																							studentReview.review ||
+																							createReview.review
+																						}
+																					/>
+																				</div>
+																				{/* Button */}
+																				<div className="col-12">
+																					<button
+																						type="submit"
+																						className="btn btn-primary mb-0"
+																					>
+																						Post Review
+																					</button>
+																				</div>
+																			</form>
+																		)}
+																		{studentReview && (
+																			<form
+																				className="row g-3 p-3"
+																				onSubmit={handleUpdateReviewSubmit}
+																			>
+																				{/* Rating */}
+																				<div className="col-12 bg-light-input">
+																					<select
+																						id="inputState2"
+																						className="form-select js-choice"
+																						onChange={handleReviewChange}
+																						name="rating"
+																						defaultValue={
+																							studentReview.rating
+																						}
+																					>
+																						<option value={1}>
+																							★☆☆☆☆ (1/5)
+																						</option>
+																						<option value={2}>
+																							★★☆☆☆ (2/5)
+																						</option>
+																						<option value={3}>
+																							★★★☆☆ (3/5)
+																						</option>
+																						<option value={4}>
+																							★★★★☆ (4/5)
+																						</option>
+																						<option value={5}>
+																							★★★★★ (5/5)
+																						</option>
+																					</select>
+																				</div>
+																				{/* Message */}
+																				<div className="col-12 bg-light-input">
+																					<textarea
+																						className="form-control"
+																						id="exampleFormControlTextarea1"
+																						placeholder="Your review"
+																						rows={3}
+																						onChange={handleReviewChange}
+																						name="review"
+																						defaultValue={
+																							studentReview.review
+																						}
+																					/>
+																				</div>
+																				{/* Button */}
+																				<div className="col-12">
+																					<button
+																						type="submit"
+																						className="btn btn-primary mb-0"
+																					>
+																						Update Review
+																					</button>
+																				</div>
+																			</form>
+																		)}
 																	</div>
 																</div>
 															</div>
