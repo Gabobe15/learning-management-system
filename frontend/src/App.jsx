@@ -14,7 +14,7 @@ import Index from './views/base/Index';
 import CourseDetail from './views/base/CourseDetail';
 import Cart from './views/base/Cart';
 import Checkout from './views/base/Checkout';
-import { CartContext } from './views/plugin/Context';
+import { CartContext, ProfileContext } from './views/plugin/Context';
 import apiInstance from './utils/axios';
 import CartId from './views/plugin/CartId';
 import Success from './views/base/Success';
@@ -27,56 +27,72 @@ import StudentDashboard from './views/student/Dashboard';
 import StudentCourses from './views/student/Courses';
 import StudentCourseDetail from './views/student/CourseDetail';
 import Wishlist from './views/student/Wishlist';
+import StudentProfile from './views/student/Profile';
+import useAxios from './utils/useAxios';
+import UserData from './views/plugin/UserData';
 
 function App() {
 	const [cartCount, setCartCount] = useState(0);
+	const [profile, setProfile] = useState([]);
 
 	useEffect(() => {
 		apiInstance
 			.get(`course/cart-list/${CartId()}`)
 			.then((res) => setCartCount(res.data?.length));
+
+		useAxios()
+			.get(`user/profile/${UserData()?.user_id}`)
+			.then((res) => {
+				setProfile(res.data);
+			});
 	}, []);
 
 	return (
 		<CartContext.Provider value={[cartCount, setCartCount]}>
-			<BrowserRouter>
-				<MainWrapper>
-					<Routes>
-						<Route path="/register/" element={<Register />} />
-						<Route path="/login/" element={<Login />} />
-						<Route path="/logout/" element={<Logout />} />
-						<Route path="/forgot-password/" element={<ForgotPassword />} />
-						<Route
-							path="/create-new-password/"
-							element={<CreateNewPassword />}
-						/>
+			<ProfileContext.Provider value={[profile, setProfile]}>
+				<BrowserRouter>
+					<MainWrapper>
+						<Routes>
+							<Route path="/register/" element={<Register />} />
+							<Route path="/login/" element={<Login />} />
+							<Route path="/logout/" element={<Logout />} />
+							<Route path="/forgot-password/" element={<ForgotPassword />} />
+							<Route
+								path="/create-new-password/"
+								element={<CreateNewPassword />}
+							/>
 
-						{/* Base routes  */}
-						<Route path="/" element={<Index />} />
-						<Route path="/course-detail/:slug/" element={<CourseDetail />} />
-						<Route path="/cart/" element={<Cart />} />
-						<Route path="/checkout/:order_oid/" element={<Checkout />} />
-						<Route path="/payment-success/:order_oid/" element={<Success />} />
-						<Route path="/search/" element={<Search />} />
-						<Route
-							path="/student/change-password/"
-							element={<ChangePassword />}
-						/>
+							{/* Base routes  */}
+							<Route path="/" element={<Index />} />
+							<Route path="/course-detail/:slug/" element={<CourseDetail />} />
+							<Route path="/cart/" element={<Cart />} />
+							<Route path="/checkout/:order_oid/" element={<Checkout />} />
+							<Route
+								path="/payment-success/:order_oid/"
+								element={<Success />}
+							/>
+							<Route path="/search/" element={<Search />} />
+							<Route
+								path="/student/change-password/"
+								element={<ChangePassword />}
+							/>
 
-						{/* Student route  */}
-						<Route path="/student/dashboard/" element={<StudentDashboard />} />
-						<Route path="/student/courses/" element={<StudentCourses />} />
-						<Route
-							path="/student/courses/:enrollment_id/"
-							element={<StudentCourseDetail />}
-						/>
-						<Route
-							path="/student/wishlist/"
-							element={<Wishlist />}
-						/>
-					</Routes>
-				</MainWrapper>
-			</BrowserRouter>
+							{/* Student route  */}
+							<Route
+								path="/student/dashboard/"
+								element={<StudentDashboard />}
+							/>
+							<Route path="/student/courses/" element={<StudentCourses />} />
+							<Route
+								path="/student/courses/:enrollment_id/"
+								element={<StudentCourseDetail />}
+							/>
+							<Route path="/student/wishlist/" element={<Wishlist />} />
+							<Route path="/student/profile/" element={<StudentProfile />} />
+						</Routes>
+					</MainWrapper>
+				</BrowserRouter>
+			</ProfileContext.Provider>
 		</CartContext.Provider>
 	);
 }

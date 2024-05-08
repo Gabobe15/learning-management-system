@@ -126,7 +126,14 @@ class ChangePasswordAPIView(generics.CreateAPIView):
         else:
             return Response({"message": "User does not exists", "icon": "error"})
 
-        
+class ProfileAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = api_serializer.ProfileSerializer
+    permission_classes = [AllowAny]
+    
+    def get_object(self):
+        user_id = self.kwargs['user_id']
+        user = User.objects.get(id=user_id)
+        return Profile.objects.get(user=user)
         
 class CategoryListView(generics.ListAPIView):
     queryset = api_models.Category.objects.filter(active=True)

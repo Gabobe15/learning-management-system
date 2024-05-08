@@ -11,6 +11,7 @@ urlpatterns = [
     path('user/password-reset/<email>/', api_views.PasswordResetEmailVerifyAPIView.as_view()),
     path('user/password-change/', api_views.PasswordChangeAPIView.as_view()),
     path('user/change-password/', api_views.ChangePasswordAPIView.as_view()),
+    path('user/profile/<user_id>/', api_views.ProfileAPIView.as_view()),
     
     #core endpoint
     path('course/category/', api_views.CategoryListView.as_view()),
