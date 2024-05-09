@@ -9,7 +9,7 @@ from api import models as api_models
 import random
 # from decimal import Decimal
 import decimal
-
+from django.db import models
 
 
 
@@ -19,9 +19,12 @@ from api import serializers as api_serializer
 from userauths.models import Profile, User
 
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+
+
+from datetime import timedelta, datetime
 
 
 import stripe 
@@ -741,3 +744,97 @@ class QuestionAnswerMessageSendAPIView(generics.CreateAPIView):
         question_serializer = api_serializer.Question_AnswerSerializer(question) #serializing the question
         return Response({"message": "Message send", "question": question_serializer.data}) #sending  message alongside question posted by the student
     
+class TeacherSummaryAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.TeacherSummarySerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        teacher_id = self.kwargs['teacher_id']
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        
+        one_month_ago = datetime.today() - timedelta(days=28) #28 days is the least time we can have in a month
+        
+        total_courses = api_models.Course.objects.filter(teacher=teacher).count()
+        total_revenue = api_models.CartOrderItem.objects.filter(teacher=teacher, order__payment_status="Paid").aggregate(total_revenue=models.Sum('price'))['total_revenue'] or 0
+        monthly_revenue = api_models.CartOrderItem.objects.filter(teacher=teacher, order__payment_status="Paid", date__gte=one_month_ago).aggregate(total_revenue=models.Sum('price'))['total_revenue'] or 0 #gte --- greater than or equal to.
+        
+        enrolled_courses = api_models.EnrolledCourse.objects.filter(teacher=teacher)
+        unique_student_ids = set()
+        students = []
+        
+        for course in enrolled_courses:
+            if course.user_id not in unique_student_ids:
+                user = User.objects.get(id=course.user_id)
+                student = {
+                    "full_name": user.profile.full_name,
+                    "image": user.profile.image.url,
+                    "country": user.profile.country,
+                    "date": course.date,
+                }
+                
+                students.append(student) #putting student object in the student array
+                unique_student_ids.add(course.user_id) #adding IDS to unique ids
+            
+        return [{
+            "total_courses": total_courses,
+            "total_revenue": total_revenue,
+            "monthly_revenue": monthly_revenue,
+            "total_students": len(students),
+        }]
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True) # we are serializing queryset and returning many items
+        return Response(serializer.data) #we are passing data to frontend 
+    
+class TeacherCourseListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.CourseSerializer 
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        teacher_id = self.kwargs['teacher_id']
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        return api_models.Course.objects.filter(teacher=teacher)
+    
+class TeacherReviewListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.ReviewSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        teacher_id = self.kwargs['teacher_id']
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        return api_models.Review.objects.filter(course__teacher=teacher)
+    
+class TeacherReviewDetailAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = api_serializer.ReviewSerializer
+    permission_classes = [AllowAny]
+    
+    def get_object(self):
+        teacher_id = self.kwargs['teacher_id']
+        review_id = self.kwargs['review_id']
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        return api_models.Review.objects.get(course__teacher=teacher, id=review_id)
+    
+class TeacherStudentListAPIView(viewsets.ViewSet):
+    def list(self, request, teacher_id=None):
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        
+        enrolled_courses = api_models.EnrolledCourse.objects.filter(teacher=teacher)
+        unique_student_ids = set()
+        students = []
+        
+        for course in enrolled_courses:
+            if course.user_id not in unique_student_ids:
+                user = User.objects.get(id=course.user_id)
+                student = {
+                    "full_name": user.profile.full_name,
+                    "image": user.profile.image.url,
+                    "country": user.profile.country,
+                    "date": course.date,
+                }
+                
+                students.append(student) #putting student object in the student array
+                unique_student_ids.add(course.user_id) #adding IDS to unique id
+                
+        return Response(students) #return students array to the frontend
+        

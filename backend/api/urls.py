@@ -46,4 +46,13 @@ urlpatterns = [
     path('student/wishlist/<user_id>/', api_views.StudentWishListListCreateAPIView.as_view()),
     path('student/question-answer-list-create/<course_id>/', api_views.QuestionAnswerListCreateAPIView.as_view()),
     path('student/question-answer-message-create/', api_views.QuestionAnswerMessageSendAPIView.as_view()),
+    
+    
+    # Teacher Routes 
+    path('teacher/summary/<teacher_id>/', api_views.TeacherSummaryAPIView.as_view()),
+    path('teacher/course-lists/<teacher_id>/', api_views.TeacherCourseListAPIView.as_view()),
+    path('teacher/review-lists/<teacher_id>/', api_views.TeacherReviewListAPIView.as_view()),
+    path('teacher/review-detail/<teacher_id>/<review_id>/', api_views.TeacherReviewDetailAPIView.as_view()),
+    path('teacher/student-lists/<teacher_id>/', api_views.TeacherStudentListAPIView.as_view({'get':'list'})),
+    
 ]

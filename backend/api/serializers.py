@@ -295,6 +295,13 @@ class StudentSummarySerializer(serializers.Serializer): #we are going to pass in
     achieved_certificates = serializers.IntegerField(default=0)
 
 
+class TeacherSummarySerializer(serializers.Serializer): 
+    total_courses = serializers.IntegerField(default=0)
+    total_students = serializers.IntegerField(default=0)
+    total_revenue = serializers.IntegerField(default=0)
+    monthly_revenue = serializers.IntegerField(default=0)
+
+
 
 
 
