@@ -28,7 +28,7 @@ function Checkout() {
 
 	const fetchOrder = async () => {
 		try {
-			apiInstance.get(`order/checkout/${param.order_oid}`).then((res) => {
+			apiInstance.get(`order/checkout/${param.order_oid}/`).then((res) => {
 				setOrder(res.data);
 			});
 		} catch (error) {
@@ -42,7 +42,7 @@ function Checkout() {
 		formdata.append('coupon_code', coupon);
 
 		try {
-			await apiInstance.post(`order/coupon`, formdata).then((res) => {
+			await apiInstance.post(`order/coupon/`, formdata).then((res) => {
 				console.log(res.data);
 				fetchOrder();
 				setCoupon(res.data);
@@ -332,7 +332,7 @@ function Checkout() {
 																console.log(status);
 																if (status === 'COMPLETED') {
 																	navigate(
-																		`payment-success/${order.oid}/?paypal_order_id=${paypal_order_id}`
+																		`payment-success/${order.oid}/?paypal_order_id=${paypal_order_id}/`
 																	);
 																}
 															});

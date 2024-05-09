@@ -1,27 +1,25 @@
 import { useState, useEffect, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 // cartcount data
 import { CartContext } from '../plugin/Context';
 
 import apiInstance from '../../utils/axios';
 
-
 import CartId from '../plugin/CartId';
 
-import { Link, useNavigate } from 'react-router-dom';
 
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import Toast from '../plugin/Toast';
 import { userId } from '../../utils/constant';
 
-
 function Cart() {
 	const [cartCount, setCartCount] = useContext(CartContext);
 	const [cart, setCart] = useState([]);
 	const [cartStats, setCartStats] = useState([]);
 
-	const navigate = useNavigate()
+	const navigate = useNavigate();
 
 	const [bioData, setBioData] = useState({
 		full_name: '',
@@ -31,12 +29,12 @@ function Cart() {
 
 	const fetchChartItem = async () => {
 		try {
-			await apiInstance.get(`course/cart-list/${CartId()}`).then((res) => {
+			await apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
 				console.log(res.data);
 				setCart(res.data);
 			});
 
-			await apiInstance.get(`cart/stats/${CartId()}`).then((res) => {
+			await apiInstance.get(`cart/stats/${CartId()}/`).then((res) => {
 				console.log(res.data);
 				setCartStats(res.data);
 			});
@@ -52,7 +50,7 @@ function Cart() {
 	// delete cart function
 	const cartItemDelete = async (itemId) => {
 		await apiInstance
-			.delete(`course/cart-item-delete/${CartId()}/${itemId}`)
+			.delete(`course/cart-item-delete/${CartId()}/${itemId}/`)
 			.then((res) => {
 				console.log(res.data);
 				fetchChartItem();
@@ -61,7 +59,7 @@ function Cart() {
 					title: 'Cart Item Delete',
 				});
 				apiInstance
-					.get(`course/cart-list/${CartId()}`)
+					.get(`course/cart-list/${CartId()}/`)
 					.then((res) => setCartCount(res.data?.length));
 			});
 	};
@@ -73,25 +71,25 @@ function Cart() {
 		});
 	};
 
-// create order using ReactJs 
-	const createOrder = async(e) =>{
-		e.preventDefault()
-		const formdata = new FormData()
-		formdata.append('full_name', bioData.full_name )
-		formdata.append('email', bioData.email )
-		formdata.append('cart_id', CartId() )
+	// create order using ReactJs
+	const createOrder = async (e) => {
+		e.preventDefault();
+		const formdata = new FormData();
+		formdata.append('full_name', bioData.full_name);
+		formdata.append('email', bioData.email);
+		formdata.append('country', bioData.country);
+		formdata.append('cart_id', CartId());
 		formdata.append('user_id', userId);
 
 		try {
-			
-			await apiInstance.post(`order/create-order/`, formdata).then(res => {
+			await apiInstance.post(`order/create-order/`, formdata).then((res) => {
 				console.log(res.data);
 				navigate(`/checkout/${res.data.order_oid}/`);
-			})
+			});
 		} catch (error) {
 			console.log(error);
 		}
-	}
+	};
 
 	return (
 		<>
@@ -269,7 +267,7 @@ function Cart() {
 										</li>
 									</ul>
 									<div className="d-grid">
-										<button type='submit' className="btn btn-lg btn-success">
+										<button type="submit" className="btn btn-lg btn-success">
 											Proceed to Checkout
 										</button>
 									</div>

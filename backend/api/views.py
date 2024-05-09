@@ -411,8 +411,8 @@ class StripeCheckoutAPIView(generics.CreateAPIView):
                     }
                 ],
                 mode='payment',
-                success_url=settings.FRONTEND_SITE_URL + 'payment-success/' + order.oid + '?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url=settings.FRONTEND_SITE_URL + 'payment-fail/'
+                success_url=settings.FRONTEND_SITE_URL + '/payment-success/' + order.oid + '?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url=settings.FRONTEND_SITE_URL + '/payment-fail/'
             )
             print("checkout_session", checkout_session)
             order.stripe_session_id=checkout_session.id
@@ -442,7 +442,7 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
         session_id = request.data['session_id']
         paypal_order_id = request.data['paypal_order_id']
         
-        order = api_models.CartOder.objects.get(oid=order_oid)
+        order = api_models.CartOrder.objects.get(oid=order_oid)
         order_items = api_models.CartOrderItem.objects.filter(order=order)
         
         #paypal payment success 
@@ -466,7 +466,12 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                         api_models.Notification.objects.create(user=order.student, order=order, type="Course Enrollment Completed")
                         # teacher 
                         for o in order_items: #teachers are stored in order_item
-                            api_models.Notification.objects.create(teacher=o.course.teacher, order=order, order_item=o, type="New Order",)
+                            api_models.Notification.objects.create(
+                                teacher=o.teacher, 
+                                order=order, 
+                                order_item=o, 
+                                type="New Order",
+                            )
                             
                             # course enrollment 
                             api_models.EnrolledCourse.objects.create(
@@ -482,7 +487,7 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                 else:
                     return Response({"message": "Payment Failed."})
             else:
-                return Response({"message": "Paypal error occured."})
+                return Response({"message": "Paypal error occurred."})
                 
         # Stripe payment success 
         if session_id != 'null':
@@ -495,7 +500,12 @@ class PaymentSuccessAPIView(generics.CreateAPIView):
                     api_models.Notification.objects.create(user=order.student, order=order, type="Course Enrollment Completed")
                     # teacher 
                     for o in order_items: #teachers are stored in order_item
-                        api_models.Notification.objects.create(teacher=o.course.teacher, order=order, order_item=o, type="New Order",)
+                        api_models.Notification.objects.create(
+                            teacher=o.teacher, 
+                            order=order, 
+                            order_item=o, 
+                            type="New Order",
+                        )
                         
                         # course enrollment 
                         api_models.EnrolledCourse.objects.create(

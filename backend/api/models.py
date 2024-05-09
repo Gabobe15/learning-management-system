@@ -262,8 +262,8 @@ class CartOrderItem(models.Model):
     order = models.ForeignKey(CartOrder, on_delete=models.CASCADE, related_name='orderitem')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='order_item')
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=12, decimal_places=12, default=0.00)
-    tax_fee = models.DecimalField(max_digits=12, decimal_places=12, default=0.00)
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    tax_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
     initial_total = models.DecimalField(max_digits=12, default=0.00, decimal_places=2)
     saved = models.DecimalField(max_digits=12,default=0.00, decimal_places=2)
@@ -330,6 +330,7 @@ class EnrolledCourse(models.Model):
     
     def review(self):
         return Review.objects.filter(course=self.course, user=self.user).first() #we want to get the updated review
+    
     
 class Note(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
