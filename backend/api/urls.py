@@ -55,4 +55,13 @@ urlpatterns = [
     path('teacher/review-detail/<teacher_id>/<review_id>/', api_views.TeacherReviewDetailAPIView.as_view()),
     path('teacher/student-lists/<teacher_id>/', api_views.TeacherStudentListAPIView.as_view({'get':'list'})),
     
+    path('teacher/all-months-earning/<teacher_id>/', api_views.TeacherAllMonthlyEarning),
+    path('teacher/best-course-earning/<teacher_id>/', api_views.TeacherBestSellingCourseAPIView.as_view({'get':'list'})),
+    path('teacher/course-order-list/<teacher_id>/', api_views.TeacherCourseOrderListAPIView.as_view()),
+    path('teacher/question-answer-list/<teacher_id>/', api_views.TeacherQuestionAnswerListAPIView.as_view()),
+    path('teacher/coupon-list/<teacher_id>/', api_views.TeacherCouponCreateAPIView.as_view()),
+    path('teacher/coupon-detail/<teacher_id>/<coupon_id>/', api_views.TeacherCouponDetailAPIView.as_view()),
+    path('teacher/noti-list/<teacher_id>/', api_views.TeacherNotificationListAPIView.as_view()),
+    path('teacher/noti-detail/<teacher_id>/<noti_id>/', api_views.TeacherNotificationDetailAPIView.as_view()),
+    
 ]

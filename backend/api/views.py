@@ -5,7 +5,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from api import models as api_models 
-
+from django.db.models.functions import ExtractMonth
 import random
 # from decimal import Decimal
 import decimal
@@ -13,15 +13,17 @@ from django.db import models
 
 
 
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from api import serializers as api_serializer 
 from userauths.models import Profile, User
 
+
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view
 
 
 from datetime import timedelta, datetime
@@ -837,4 +839,91 @@ class TeacherStudentListAPIView(viewsets.ViewSet):
                 unique_student_ids.add(course.user_id) #adding IDS to unique id
                 
         return Response(students) #return students array to the frontend
+    
+    
+@api_view(("GET",))
+def TeacherAllMonthlyEarning(request, teacher_id):
+    teacher = api_models.Teacher.objects.get(id=teacher_id)
+    monthly_earning_tracker = (
+        api_models.CartOrderItem.objects.filter(teacher=teacher, order__payment_status="Paid").annotate(month=ExtractMonth("date")).values("month").annotate(
+            total_earning=models.Sum("price")
+        ).order_by("month")
+    )
+    return Response(monthly_earning_tracker)   
+
+class TeacherBestSellingCourseAPIView(viewsets.ViewSet):
+    def list(self, request, teacher_id=None):
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        courses_with_total_price = []
+        courses = api_models.Course.objects.filter(teacher=teacher)
         
+        for course in courses:
+            revenue = course.enrolledcourse_set.aggregate(total_price=models.Sum('order_item__price'))['total_price'] or 0 
+            sales = course.enrolledcourse_set.count()
+            
+            courses_with_total_price.append({
+                'course_image': course.image.url,
+                'course_title': course.title,
+                'revenue': revenue,
+                'sales': sales,
+            })
+        return Response(courses_with_total_price)
+    
+class TeacherCourseOrderListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.CartOrderItemSerializer 
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        teacher_id = self.kwargs['teacher_id']
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        
+        return api_models.CartOrderItem.objects.filter(teacher=teacher)
+    
+class TeacherQuestionAnswerListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.Question_AnswerSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        teacher_id = self.kwargs['teacher_id']
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        return api_models.Question_Answer.objects.filter(course__teacher=teacher)
+    
+class TeacherCouponCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = api_serializer.CouponSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        teacher_id = self.kwargs['teacher_id']
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        return api_models.Coupon.objects.filter(teacher=teacher)
+    
+class TeacherCouponDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = api_serializer.CouponSerializer
+    permission_classes = [AllowAny]
+    
+    def get_object(self):
+        teacher_id = self.kwargs['teacher_id']
+        coupon_id = self.kwargs['coupon_id']
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        return api_models.Coupon.objects.get(teacher=teacher, id=coupon_id)
+    
+class TeacherNotificationListAPIView(generics.ListAPIView):
+    serializer_class = api_serializer.NotificationSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        teacher_id = self.kwargs['teacher_id']
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        return api_models.Notification.objects.filter(teacher=teacher, seen=False)
+    
+class TeacherNotificationDetailAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = api_serializer.NotificationSerializer
+    permission_classes = [AllowAny]
+    
+    def get_object(self):
+        teacher_id = self.kwargs['teacher_id']
+        noti_id = self.kwargs['noti_id']
+        teacher = api_models.Teacher.objects.get(id=teacher_id)
+        return api_models.Notification.objects.get(teacher=teacher, id=noti_id)
+        
+    
