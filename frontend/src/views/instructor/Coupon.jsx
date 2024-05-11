@@ -9,7 +9,6 @@ import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 
 import useAxios from '../../utils/useAxios';
-import { userId } from '../../utils/constant';
 import UserData from '../plugin/UserData';
 import Toast from '../plugin/Toast';
 

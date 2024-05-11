@@ -237,7 +237,7 @@ function CourseDetail() {
 			fetchCourseDetail();
 		} else {
 			const filtered = questions?.filter((question) => {
-				return question.title.toLowerCase().include(query);
+				return question.title.toLowerCase().includes(query);
 			});
 			return setQuestions(filtered);
 		}

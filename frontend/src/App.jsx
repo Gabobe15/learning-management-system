@@ -20,7 +20,7 @@ import CartId from './views/plugin/CartId';
 import Success from './views/base/Success';
 import Search from './views/base/Search';
 
-import ChangePassword from './views/student/ChangePassword';
+import SChangePassword from './views/student/ChangePassword';
 
 // students
 import StudentDashboard from './views/student/Dashboard';
@@ -30,6 +30,7 @@ import Wishlist from './views/student/Wishlist';
 import StudentProfile from './views/student/Profile';
 import useAxios from './utils/useAxios';
 import UserData from './views/plugin/UserData';
+import StudentQA from './views/student/QA'
 
 // instructor
 import InstructorDashboard from './views/instructor/Dashboard';
@@ -40,6 +41,10 @@ import Earning from './views/instructor/Earning';
 import Orders from './views/instructor/Orders';
 import Coupon from './views/instructor/Coupon';
 import TeacherNotification from './views/instructor/TeacherNotification';
+import QA from './views/instructor/QA';
+import InstructorChangePassword from './views/instructor/ChangePassword';
+import IProfile from './views/instructor/Profile';
+import QADetail from './views/instructor/QADetail';
 
 function App() {
 	const [cartCount, setCartCount] = useState(0);
@@ -84,7 +89,7 @@ function App() {
 							<Route path="/search/" element={<Search />} />
 							<Route
 								path="/student/change-password/"
-								element={<ChangePassword />}
+								element={<SChangePassword />}
 							/>
 
 							{/* Student route  */}
@@ -99,16 +104,30 @@ function App() {
 							/>
 							<Route path="/student/wishlist/" element={<Wishlist />} />
 							<Route path="/student/profile/" element={<StudentProfile />} />
+							<Route path="/student/question-answer/" element={<StudentQA />} />
 
 							{/* Teacher routes  */}
-							<Route path="instructor/dashboard/" element={<InstructorDashboard />}/>
+							<Route
+								path="instructor/dashboard/"
+								element={<InstructorDashboard />}
+							/>
 							<Route path="instructor/courses/" element={<Courses />} />
 							<Route path="instructor/reviews/" element={<Review />} />
 							<Route path="instructor/students/" element={<Students />} />
 							<Route path="instructor/earning/" element={<Earning />} />
 							<Route path="instructor/orders/" element={<Orders />} />
 							<Route path="instructor/coupon/" element={<Coupon />} />
-							<Route path="instructor/notifications/" element={<TeacherNotification />} />
+							<Route
+								path="instructor/notifications/"
+								element={<TeacherNotification />}
+							/>
+							<Route path="instructor/question-answer/" element={<QA />} />
+							<Route path="instructor/quiz/" element={<QADetail />} />
+							<Route
+								path="instructor/change-password/"
+								element={<InstructorChangePassword />}
+							/>
+							<Route path="instructor/profile/" element={<IProfile />} />
 						</Routes>
 					</MainWrapper>
 				</BrowserRouter>
