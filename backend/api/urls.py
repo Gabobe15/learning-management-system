@@ -66,6 +66,9 @@ urlpatterns = [
     # create course 
     path('teacher/course-create/', api_views.CourseCreateAPIView.as_view()),
     path('teacher/course-update/<teacher_id>/<course_id>/', api_views.CourseUpdateAPIView.as_view()),
+    path('teacher/course-detail/<slug>/', api_views.CourseDetailAPIView.as_view()),
+    path('teacher/course-variant-delete/<variant_id>/<teacher_id>/<course_id>/', api_views.CourseVariantDeleteAPIView.as_view()),
+    path('teacher/course-variant-item-delete/<variant_id>/<variant_item_id>/<teacher_id>/<course_id>/', api_views.CourseVariantItemDeleteAPIView.as_view()),
     
     
 ]

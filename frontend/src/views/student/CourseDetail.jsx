@@ -826,9 +826,7 @@ function CourseDetail() {
 																						className="form-select js-choice"
 																						onChange={handleReviewChange}
 																						name="rating"
-																						defaultValue={
-																							studentReview.rating
-																						}
+																						defaultValue={studentReview.rating}
 																					>
 																						<option value={1}>
 																							★☆☆☆☆ (1/5)
@@ -856,9 +854,7 @@ function CourseDetail() {
 																						rows={3}
 																						onChange={handleReviewChange}
 																						name="review"
-																						defaultValue={
-																							studentReview.review
-																						}
+																						defaultValue={studentReview.review}
 																					/>
 																				</div>
 																				{/* Button */}

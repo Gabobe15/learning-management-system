@@ -31,6 +31,12 @@ import StudentProfile from './views/student/Profile';
 import useAxios from './utils/useAxios';
 import UserData from './views/plugin/UserData';
 
+// instructor
+import InstructorDashboard from './views/instructor/Dashboard';
+import Courses from './views/instructor/Courses';
+import Review from './views/instructor/Review';
+import Students from './views/instructor/Students';
+
 function App() {
 	const [cartCount, setCartCount] = useState(0);
 	const [profile, setProfile] = useState([]);
@@ -89,6 +95,12 @@ function App() {
 							/>
 							<Route path="/student/wishlist/" element={<Wishlist />} />
 							<Route path="/student/profile/" element={<StudentProfile />} />
+
+							{/* Teacher routes  */}
+							<Route path="instructor/dashboard/" element={<InstructorDashboard />}/>
+							<Route path="instructor/courses/" element={<Courses />} />
+							<Route path="instructor/reviews/" element={<Review />} />
+							<Route path="instructor/students/" element={<Students />} />
 						</Routes>
 					</MainWrapper>
 				</BrowserRouter>

@@ -56,7 +56,6 @@ class UserSerializer(serializers.ModelSerializer):
         
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
-        # fields = ["user","image","full_name","bio","facebook","twitter","linkedin","about", "country","students","courses","review",]
         fields = '__all__'
         model = api_models.Teacher 
             

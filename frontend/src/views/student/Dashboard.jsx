@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
+
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import Sidebar from './Partials/Sidebar';
 import Header from './Partials/Header';
-
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 
@@ -21,21 +21,24 @@ function Dashboard() {
 			.then((res) => {
 				console.log(res.data[0]);
 				setStats(res.data[0]);
-				setFetching(false);
 			});
+
 		useAxios()
 			.get(`student/course-list/${UserData()?.user_id}/`)
 			.then((res) => {
 				console.log(res.data);
-				setStats(res.data);
+				setCourses(res.data);
+				setFetching(false);
 			});
 	};
+
 	useEffect(() => {
 		fetchData();
 	}, []);
 
-	const handleSearch = (e) => {
-		const query = e.target.value.toLowerCase();
+	const handleSearch = (event) => {
+		const query = event.target.value.toLowerCase();
+		console.log(query);
 		if (query === '') {
 			fetchData();
 		} else {
@@ -89,6 +92,7 @@ function Dashboard() {
 										<div className="ms-4">
 											<div className="d-flex">
 												<h5 className="purecounter mb-0 fw-bold">
+													{' '}
 													{stats.completed_lessons}
 												</h5>
 											</div>
@@ -114,7 +118,9 @@ function Dashboard() {
 									</div>
 								</div>
 							</div>
-							{fetching === true && <p className="mt-4 p-4">Loading ....</p>}
+
+							{fetching === true && <p className="mt-3 p-3">Loading...</p>}
+
 							{fetching === false && (
 								<div className="card mb-4">
 									<div className="card-header">
@@ -186,6 +192,7 @@ function Dashboard() {
 																		<li className="list-inline-item">
 																			<i className="bi bi-reception-4"></i>
 																			<span className="ms-1">
+																				{' '}
 																				{c.course.level}
 																			</span>
 																		</li>
@@ -195,7 +202,7 @@ function Dashboard() {
 														</td>
 														<td>
 															<p className="mt-3">
-																{moment(c.date).format('DD MM YYYY')}
+																{moment(c.date).format('D MMM, YYYY')}
 															</p>
 														</td>
 														<td>
@@ -209,26 +216,28 @@ function Dashboard() {
 														<td>
 															{c.completed_lesson?.length < 1 && (
 																<Link
-																	to={`student/courses/${c.enrollment_id}`}
+																	to={`/student/courses/${c.enrollment_id}/`}
 																	className="btn btn-success btn-sm mt-3"
 																>
-																	Start Course{' '}
+																	start Course
 																	<i className="fas fa-arrow-right ms-2"></i>
 																</Link>
 															)}
+
 															{c.completed_lesson?.length > 0 && (
 																<Link
-																	to={`student/courses/${c.enrollment_id}`}
+																	to={`/student/courses/${c.enrollment_id}/`}
 																	className="btn btn-primary btn-sm mt-3"
 																>
-																	Continue Course{' '}
+																	Continue Course
 																	<i className="fas fa-arrow-right ms-2"></i>
 																</Link>
 															)}
 														</td>
 													</tr>
 												))}
-												{courses.length < 1 && (
+
+												{courses?.length < 1 && (
 													<p className="mt-4 p-4">No courses found</p>
 												)}
 											</tbody>

@@ -20,7 +20,7 @@ import apiInstance from '../../utils/axios';
 
 function Index() {
 	const [courses, setCourses] = useState([]);
-	const [isLoading, setIsloading] = useState(true);
+	const [isLoading, setIsLoading] = useState(true);
 
 	const country = GetCurrentAddress()?.country;
 	const userId = UserData()?.user_id;
@@ -29,13 +29,13 @@ function Index() {
 	const [cartCount, setCartCount] = useContext(CartContext);
 
 	const fetchCourse = async () => {
-		setIsloading(true);
+		setIsLoading(true);
 		try {
-			await useAxios()
+			await apiInstance
 				.get(`/course/course-list/`)
 				.then((res) => {
 					setCourses(res.data);
-					setIsloading(false);
+					setIsLoading(false);
 				});
 		} catch (error) {
 			console.log(error);
