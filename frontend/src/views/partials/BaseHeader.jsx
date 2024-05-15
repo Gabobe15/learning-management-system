@@ -40,13 +40,13 @@ function BaseHeader() {
 					<div className="collapse navbar-collapse" id="navbarSupportedContent">
 						<ul className="navbar-nav me-auto mb-2 mb-lg-0">
 							<li className="nav-item">
-								<Link className="nav-link" to="/pages/contact-us/">
+								<Link className="nav-link" to="/contact-us/">
 									{' '}
 									<i className="fas fa-phone"></i> Contact Us
 								</Link>
 							</li>
 							<li className="nav-item">
-								<Link className="nav-link" to="/pages/about-us/">
+								<Link className="nav-link" to="/about-us/">
 									<i className="fas fa-address-card"></i> About Us
 								</Link>
 							</li>

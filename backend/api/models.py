@@ -8,12 +8,12 @@ import math
 
 LANGUAGE = (
     ('English', 'English'), #key value pair
-    ('Spanish', 'Spanish'),
-    ('French', 'French'),
+    ('Kiswahili', 'Kiswahili'),
+    ('Arabic', 'Arabic'),
 )
 
 LEVEL = (
-    ('Beginner', 'Beginner'), #key value pair
+    ('Beginners', 'Beginners'), #key value pair
     ('Intermediate', 'Intermediate'),
     ('Advanced', 'Advanced'),
 )
@@ -101,9 +101,9 @@ class Category(models.Model):
 class Course(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE) #delete the course as we delete the teacher 
-    file = models.FileField(upload_to='course-file',blank=True, null=True) #intro video
-    image = models.FileField(upload_to='course-file',blank=True, null=True) #thumbnail
-    title = models.CharField(max_length=100,)
+    file = models.FileField(upload_to='course-file', blank=True, null=True) #intro video
+    image = models.FileField(upload_to='course-file', blank=True, null=True) #thumbnail
+    title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=12, decimal_places=2,default=0.00)
     language = models.CharField(max_length=100,choices=LANGUAGE, default='English')
@@ -120,7 +120,7 @@ class Course(models.Model):
     
     def save(self, *args, **kwargs):
         if self.slug == "" or self.slug == None:
-            self.slug = slugify(self.title)
+            self.slug = slugify(self.title) + str(self.id)
         super(Course, self).save(*args, **kwargs)
     
     def students(self): #all student for the course
@@ -152,6 +152,9 @@ class Variant(models.Model):#section
         return self.title 
     
     def variant_items(self):
+        return VariantItem.objects.filter(variant=self)
+    
+    def items(self):
         return VariantItem.objects.filter(variant=self)
     
 class VariantItem(models.Model): #model in section 

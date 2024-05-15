@@ -157,9 +157,9 @@ class CourseDetailAPIView(generics.RetrieveAPIView): #retriveapiview to get one 
     queryset = api_models.Course.objects.filter(platform_status='Published', teacher_course_status="Published")
 
     def get_object(self):
-        slug = self.kwargs['slug']
-        course = api_models.Course.objects.get(slug=slug, platform_status="Published", teacher_course_status="Published")
-        # course = api_models.Course.objects.filter(slug=slug, platform_status="Published", teacher_course_status="Published").first()
+        course_id = self.kwargs['course_id']
+        # course = api_models.Course.objects.get(course_id=course_id, platform_status="Published", teacher_course_status="Published")
+        course = api_models.Course.objects.filter(slug=slug, platform_status="Published", teacher_course_status="Published").first()
         return course
         
 class CartAPIView(generics.CreateAPIView): #adding item to cart
@@ -572,7 +572,7 @@ class StudentCourseDetailAPIView(generics.RetrieveAPIView):
         enrollment_id = self.kwargs['enrollment_id']
         
         user = User.objects.get(id=user_id)
-        return api_models.EnrolledCourse.objects.get(id=user, enrollment_id=enrollment_id)
+        return api_models.EnrolledCourse.objects.get(user=user, enrollment_id=enrollment_id)
         
 class StudentCourseCompletedCreateAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.CompletedLessonSerializer
@@ -933,6 +933,8 @@ class TeacherNotificationDetailAPIView(generics.RetrieveUpdateAPIView):
         noti_id = self.kwargs['noti_id']
         teacher = api_models.Teacher.objects.get(id=teacher_id)
         return api_models.Notification.objects.get(teacher=teacher, id=noti_id)
+   
+
     
 class CourseCreateAPIView(generics.CreateAPIView):
     queryset = api_models.Course.objects.all()
@@ -940,7 +942,8 @@ class CourseCreateAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     
     def perform_create(self, serializer):
-        serializer.is_valid(raise_exception=True) #if the serializer is not true raise exception ---raise error
+        #if the serializer is not true raise exception ---raise error
+        serializer.is_valid(raise_exception=True) 
         course_instance = serializer.save() #course object -- serialized
         
         variant_data = []
@@ -949,22 +952,23 @@ class CourseCreateAPIView(generics.CreateAPIView):
                 index = key.split('[')[1].split(']')[0] # the key will be written as [1][2][3] -- this means to remove the square brackets and remain with the value of index=1,2,3...
                 title = value 
                 
-                variant_data = {"title": title}
+                variant_dict = {"title": title}
                 item_data_list = []
                 current_item = {}
+                variant_data = []
                 
                 for item_key, item_value in self.request.data.items():
-                    if f'variants[{index}]' in item_key:
+                    if f'variants[{index}][items]' in item_key:
                         field_name = item_key.split('[')[-1].split(']')[0]
                         if field_name == "title":
                             if current_item:
                                 item_data_list.append(current_item) #
                             current_item = {} #else we return empty variant object
-                        current_item.update({field_name: item_value}) # if field name is not equal to title get the other field name
+                        current_item.update({field_name: item_value}) 
                 if current_item:
                     item_data_list.append(current_item)
                 
-                variant_data.append({'variant_data': variant_data, 'variant_item_data': item_data_list})
+                variant_data.append({'variant_data': variant_dict, 'variant_item_data': item_data_list})
                 
         # if variant does not exist we are create new one 
         for data_entry in variant_data:
@@ -974,6 +978,7 @@ class CourseCreateAPIView(generics.CreateAPIView):
             for item_data in data_entry['variant_item_data']:
                 preview_value = item_data.get('preview')
                 preview = bool(strtobool(str(preview_value))) if preview_value is not None else False
+                
                 
                 api_models.VariantItem.objects.create(
                     variant=variant,
@@ -1123,8 +1128,8 @@ class CourseDetailAPIView(generics.RetrieveDestroyAPIView):
     permission_classes = [AllowAny]
     
     def get_object(self):
-        slug = self.kwargs['slug']
-        return api_models.Course.objects.get(slug=slug)
+        course_id = self.kwargs['course_id']
+        return api_models.Course.objects.get(course_id=course_id)
 
 class CourseVariantDeleteAPIView(generics.RetrieveDestroyAPIView):
     serializer_class = api_serializer.CourseSerializer
@@ -1137,7 +1142,7 @@ class CourseVariantDeleteAPIView(generics.RetrieveDestroyAPIView):
         
         teacher = api_models.Teacher.objects.get(id=teacher_id)
         course = api_models.Course.objects.get(teacher=teacher, course_id=course_id)
-        return api_models.Variant.objects.get(variant_id=variant_id)        
+        return api_models.Variant.objects.get(id=variant_id)        
 
 class CourseVariantItemDeleteAPIView(generics.DestroyAPIView):
     serializer_class = api_serializer.VariantItemSerializer

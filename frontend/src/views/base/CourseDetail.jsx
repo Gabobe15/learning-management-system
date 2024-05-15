@@ -45,7 +45,7 @@ function CourseDetail() {
 	const fetchCourse = () => {
 		setIsLoading(true);
 		useAxios()
-			.get(`course/course-detail/${params.slug}`)
+			.get(`course/course-detail/${params.slug}/`)
 			.then((res) => {
 				setCourse(res.data);
 				setIsLoading(false);
@@ -112,10 +112,10 @@ function CourseDetail() {
 									<div className="col-lg-8">
 										{/* Badge */}
 										<h6 className="mb-3 font-base bg-primary text-white py-2 px-4 rounded-2 d-inline-block">
-											{course.category.title}
+											{course?.category?.title}
 										</h6>
 										{/* Title */}
-										<h1 className="mb-3">{course.title}</h1>
+										<h1 className="mb-3">{course?.title}</h1>
 										<p
 											className="mb-3"
 											dangerouslySetInnerHTML={{
@@ -126,23 +126,23 @@ function CourseDetail() {
 										<ul className="list-inline mb-0">
 											<li className="list-inline-item h6 me-3 mb-1 mb-sm-0">
 												<i className="fas fa-star text-warning me-2" />
-												{course.average_rating}/5.0
+												{course?.average_rating}/5.0
 											</li>
 											<li className="list-inline-item h6 me-3 mb-1 mb-sm-0">
 												<i className="fas fa-user-graduate text-orange me-2" />
-												{course.students?.length} Enrolled
+												{course?.students?.length} Enrolled
 											</li>
 											<li className="list-inline-item h6 me-3 mb-1 mb-sm-0">
 												<i className="fas fa-signal text-success me-2" />
-												{course.level}
+												{course?.level}
 											</li>
 											<li className="list-inline-item h6 me-3 mb-1 mb-sm-0">
 												<i className="bi bi-patch-exclamation-fill text-danger me-2" />
-												{moment(course.date).format('DD MMM, YYYY')}
+												{moment(course?.date).format('DD MMM, YYYY')}
 											</li>
 											<li className="list-inline-item h6 mb-0">
 												<i className="fas fa-globe text-info me-2" />
-												{course.language}
+												{course?.language}
 											</li>
 										</ul>
 									</div>
@@ -361,7 +361,7 @@ function CourseDetail() {
 																						</span>
 																					</div>
 																					<p className="mb-0">
-																						{c.content_duration}
+																						{l.content_duration}
 																					</p>
 																				</div>
 																			))}
@@ -398,14 +398,14 @@ function CourseDetail() {
 																	<div className="card-body">
 																		{/* Title */}
 																		<h3 className="card-title mb-0">
-																			{course.teacher.full_name}
+																			{course?.teacher?.full_name}
 																		</h3>
-																		<p className="mb-2">{course.teacher.bio}</p>
+																		<p className="mb-2">{course?.teacher.bio}</p>
 																		{/* Social button */}
 																		<ul className="list-inline mb-3">
 																			<li className="list-inline-item me-3">
 																				<a
-																					href={course.teacher.twitter}
+																					href={course?.teacher?.twitter}
 																					className="fs-5 text-twitter"
 																				>
 																					<i className="fab fa-twitter-square" />

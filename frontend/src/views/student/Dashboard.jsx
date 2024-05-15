@@ -19,14 +19,12 @@ function Dashboard() {
 		useAxios()
 			.get(`student/summary/${UserData()?.user_id}/`)
 			.then((res) => {
-				console.log(res.data[0]);
 				setStats(res.data[0]);
 			});
 
 		useAxios()
 			.get(`student/course-list/${UserData()?.user_id}/`)
 			.then((res) => {
-				console.log(res.data);
 				setCourses(res.data);
 				setFetching(false);
 			});
@@ -38,7 +36,6 @@ function Dashboard() {
 
 	const handleSearch = (event) => {
 		const query = event.target.value.toLowerCase();
-		console.log(query);
 		if (query === '') {
 			fetchData();
 		} else {
@@ -48,6 +45,7 @@ function Dashboard() {
 			setCourses(filtered);
 		}
 	};
+
 
 	return (
 		<>

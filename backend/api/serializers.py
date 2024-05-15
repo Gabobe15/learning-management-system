@@ -76,6 +76,7 @@ class VariantItemSerializer(serializers.ModelSerializer):
         
 class VariantSerializer(serializers.ModelSerializer):
     variant_items = VariantItemSerializer(many=True)
+    items = VariantItemSerializer(many=True)
     class Meta:
         model = api_models.Variant
         fields = '__all__' 
@@ -151,8 +152,7 @@ class CartOrderSerializer(serializers.ModelSerializer):
         if request and request.method == "POST":
             self.Meta.depth = 0
         else:
-            self.Meta.depth = 3
-        
+            self.Meta.depth = 3        
 class CertificateSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.Certificate
@@ -252,7 +252,7 @@ class CourseSerializer(serializers.ModelSerializer):
     students = EnrolledCourseSerializer(many=True, required=False, read_only=True) #we expect many student to be in this course
     curriculum = VariantSerializer(many=True, required=False, read_only=True)
     lectures = VariantItemSerializer(many=True, required=False, read_only=True)
-    reviews = ReviewSerializer(many=True, required=False)
+    reviews = ReviewSerializer(many=True, required=False, read_only=True)
     # average_rating = ReviewSerializer()
     # rating_count = ReviewSerializer()
     # rating_count =  ReviewSerializer()

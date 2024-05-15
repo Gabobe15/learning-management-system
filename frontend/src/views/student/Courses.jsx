@@ -20,7 +20,6 @@ function Courses() {
 		useAxios()
 			.get(`student/course-list/${UserData()?.user_id}/`)
 			.then((res) => {
-				console.log(res.data);
 				setCourses(res.data);
 				setFetching(false);
 			});
@@ -155,17 +154,17 @@ function Courses() {
 														</td>
 														<td>
 															{c.completed_lesson?.length < 1 && (
-																<button className="btn btn-success btn-sm mt-3">
+																<button to={`student/courses/${c?.enrollment_id}/`} className="btn btn-success btn-sm mt-3">
 																	start Course
 																	<i className="fas fa-arrow-right ms-2"></i>
 																</button>
 															)}
 
 															{c.completed_lesson?.length > 0 && (
-																<button className="btn btn-primary btn-sm mt-3">
+																<Link className="btn btn-primary btn-sm mt-3">
 																	Continue Course
 																	<i className="fas fa-arrow-right ms-2"></i>
-																</button>
+																</Link>
 															)}
 														</td>
 													</tr>

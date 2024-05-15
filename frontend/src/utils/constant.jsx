@@ -5,3 +5,4 @@ export const userId = UserData()?.user_id;
 export const PAYPAL_CLIENT_ID = 'test';
 export const teacherId = UserData()?.teacher_id;
 export const serverUrl = `http:127.0.0.1:8000`;
+

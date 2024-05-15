@@ -1,10 +1,8 @@
 import { useContext } from 'react';
 import { ProfileContext } from '../../plugin/Context';
-import UserData from '../../plugin/UserData';
 
 function Header() {
 	const [profile, setProfile] = useContext(ProfileContext);
-	console.log('profile', profile);
 	return (
 		<div className="row align-items-center">
 			<div className="col-xl-12 col-lg-12 col-md-12 col-12">
