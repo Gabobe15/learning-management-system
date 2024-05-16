@@ -11,6 +11,8 @@ import Sidebar from './Partials/Sidebar';
 import Header from './Partials/Header';
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
+import Toast from '../plugin/Toast';
+import apiInstance from '../../utils/axios';
 
 function CourseDetail() {
 	const [course, setCourse] = useState([]);
@@ -18,6 +20,8 @@ function CourseDetail() {
 	const [variantItem, setVariantItem] = useState(null);
 	const [completePercentage, setCompletePercentage] = useState(0);
 	const [markAsCompletedStatus, setMarkAsCompletedStatus] = useState({});
+	const [createNote, setCreateNote] = useState({ title: '', note: '' });
+	const [selectedNote, setSelectedNote] = useState(null);
 
 	// play lecturer
 	const [show, setShow] = useState(false);
@@ -30,8 +34,9 @@ function CourseDetail() {
 	// note
 	const [noteShow, setNoteShow] = useState(false);
 	const handleNoteClose = () => setNoteShow(false);
-	const handleNoteShow = () => {
+	const handleNoteShow = (note) => {
 		setNoteShow(true);
+		setSelectedNote(note);
 	};
 
 	const [ConversationShow, setConversationShow] = useState(false);
@@ -80,6 +85,82 @@ function CourseDetail() {
 				});
 			});
 	};
+
+	const handleNoteChange = (e) => {
+		setCreateNote({
+			...createNote,
+			[e.target.name]: e.target.value,
+		});
+	};
+
+	const handleSubmitCreateNote = async (e) => {
+		e.preventDefault();
+
+		const formdata = new FormData();
+
+		formdata.append('user_id', UserData()?.user_id);
+		formdata.append('enrollment_id', param?.enrollment_id);
+		formdata.append('title', createNote?.title);
+		formdata.append('note', createNote?.note);
+
+		try {
+			await useAxios()
+				.post(
+					`student/course-note/${UserData()?.user_id}/${param?.enrollment_id}/`,
+					formdata
+				)
+				.then((res) => {
+					console.log(res.data);
+					fetchCourseDetail();
+					handleNoteClose();
+
+					Toast().fire({
+						icon: 'success',
+						title: 'Note created',
+					});
+				});
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const handleSubmitEditNote = (e, noteId) => {
+		e.preventDefault();
+		const formdata = new FormData();
+
+		formdata.append('user_id', UserData()?.user_id);
+		formdata.append('enrollment_id', param?.enrollment_id);
+		formdata.append('note_id', param?.note_id);
+		formdata.append('title', createNote?.title || selectedNote?.title);
+		formdata.append('note', createNote?.note || selectedNote?.note);
+
+		useAxios()
+			.patch(
+				`student/course-note-detail/${UserData()?.user_id}/${param?.enrollment_id}/${noteId}/`,
+				formdata
+			)
+			.then((res) => {
+				console.log(res.data);
+				fetchCourseDetail();
+				handleNoteClose();
+				Toast().fire({
+					icon: 'success',
+					title: 'Note updated',
+				});
+			});
+	};
+
+	const handleDeleteNote = (noteId) => {
+		useAxios().delete(`student/course-note-detail/${UserData()?.user_id}/${param?.enrollment_id}/${noteId}/`).then((res) => {
+				console.log(res.data);
+				fetchCourseDetail();
+				handleNoteClose();
+				Toast().fire({
+					icon: 'success',
+					title: 'Note deleted',
+				});
+		})
+	}
 
 	return (
 		<>
@@ -277,7 +358,11 @@ function CourseDetail() {
 																											l?.variant_item_id
 																										)
 																									}
-																									checked={course?.completed_lesson?.some((cl) => cl?.variant_item?.id === l?.id)}
+																									checked={course?.completed_lesson?.some(
+																										(cl) =>
+																											cl?.variant_item?.id ===
+																											l?.id
+																									)}
 																								/>
 																							</div>
 																						</div>
@@ -336,7 +421,9 @@ function CourseDetail() {
 																						/>
 																					</div>
 																					<div className="modal-body">
-																						<form>
+																						<form
+																							onSubmit={handleSubmitCreateNote}
+																						>
 																							<div className="mb-3">
 																								<label
 																									htmlFor="exampleInputEmail1"
@@ -345,6 +432,8 @@ function CourseDetail() {
 																									Note Title
 																								</label>
 																								<input
+																									name="title"
+																									onChange={handleNoteChange}
 																									type="text"
 																									className="form-control"
 																								/>
@@ -358,7 +447,8 @@ function CourseDetail() {
 																								</label>
 																								<textarea
 																									className="form-control"
-																									name=""
+																									name="note"
+																									onChange={handleNoteChange}
 																									id=""
 																									cols="30"
 																									rows="10"
@@ -388,47 +478,34 @@ function CourseDetail() {
 																</div>
 																<div className="card-body p-0 pt-3">
 																	{/* Note item start */}
-																	<div className="row g-4 p-3">
-																		<div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
-																			<h5>
-																				{' '}
-																				What is Digital Marketing What is
-																				Digital Marketing
-																			</h5>
-																			<p>
-																				Arranging rapturous did believe him all
-																				had supported. Supposing so be resolving
-																				breakfast am or perfectly. It drew a
-																				hill from me. Valley by oh twenty direct
-																				me so. Departure defective arranging
-																				rapturous did believe him all had
-																				supported. Family months lasted simple
-																				set nature vulgar him. Picture for
-																				attempt joy excited ten carried manners
-																				talking how. Family months lasted simple
-																				set nature vulgar him. Picture for
-																				attempt joy excited ten carried manners
-																				talking how.
-																			</p>
-																			{/* Buttons */}
-																			<div className="hstack gap-3 flex-wrap">
-																				<a
-																					onClick={handleNoteShow}
-																					className="btn btn-success mb-0"
-																				>
-																					<i className="bi bi-pencil-square me-2" />{' '}
-																					Edit
-																				</a>
-																				<a
-																					href="#"
-																					className="btn btn-danger mb-0"
-																				>
-																					<i className="bi bi-trash me-2" />{' '}
-																					Delete
-																				</a>
+																	{course?.note?.map((n, index) => (
+																		<div className="row g-4 p-3" key={index}>
+																			<div className="col-sm-11 col-xl-11 shadow p-3 m-3 rounded">
+																				<h5> {n?.title}</h5>
+																				<p>{n?.note}</p>
+																				{/* Buttons */}
+																				<div className="hstack gap-3 flex-wrap">
+																					<a
+																						onClick={() => handleNoteShow(n)}
+																						className="btn btn-success mb-0"
+																					>
+																						<i className="bi bi-pencil-square me-2" />{' '}
+																						Edit
+																					</a>
+																					<a
+																						onClick={() => handleDeleteNote(n?.id)}
+																						className="btn btn-danger mb-0"
+																					>
+																						<i className="bi bi-trash me-2" />{' '}
+																						Delete
+																					</a>
+																				</div>
 																			</div>
 																		</div>
-																	</div>
+																	))}
+																	{course?.note?.length < 1 && (
+																		<p className="mt-3 p-3">No notes</p>
+																	)}
 																	<hr />
 																</div>
 															</div>
@@ -606,17 +683,18 @@ function CourseDetail() {
 			{/* Note Edit Modal */}
 			<Modal show={noteShow} size="lg" onHide={handleNoteClose}>
 				<Modal.Header closeButton>
-					<Modal.Title>Note: Note Title</Modal.Title>
+					<Modal.Title>Note: {selectedNote?.title}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					<form>
+					<form onSubmit={(e) => handleSubmitEditNote(e, selectedNote?.id)}>
 						<div className="mb-3">
 							<label htmlFor="exampleInputEmail1" className="form-label">
 								Note Title
 							</label>
 							<input
-								defaultValue={null}
+								defaultValue={selectedNote?.title}
 								name="title"
+								onChange={handleNoteChange}
 								type="text"
 								className="form-control"
 							/>
@@ -626,8 +704,8 @@ function CourseDetail() {
 								Note Content
 							</label>
 							<textarea
-								onChange={null}
-								defaultValue={null}
+								onChange={handleNoteChange}
+								defaultValue={selectedNote?.note}
 								name="note"
 								className="form-control"
 								cols="30"
@@ -637,7 +715,7 @@ function CourseDetail() {
 						<button
 							type="button"
 							className="btn btn-secondary me-2"
-							onClick={null}
+							onClick={handleNoteClose}
 						>
 							<i className="fas fa-arrow-left"></i> Close
 						</button>

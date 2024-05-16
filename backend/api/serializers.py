@@ -175,9 +175,10 @@ class CompletedLessonSerializer(serializers.ModelSerializer):
         # ]  
         
 class NoteSerializer(serializers.ModelSerializer):
+    
     class Meta:
-        model = api_models.Note
         fields = '__all__'
+        model = api_models.Note
         
         # fields = ['id','user','course','title','note','note_id','date',
         # ]
