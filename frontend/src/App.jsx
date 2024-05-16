@@ -83,7 +83,7 @@ function App() {
 
 							{/* Base routes  */}
 							<Route path="/" element={<Index />} />
-							<Route path="/course-detail/:slug/" element={<CourseDetail />} />
+							<Route path="/course-detail/:course_id/" element={<CourseDetail />} />
 							<Route path="/cart/" element={<Cart />} />
 							<Route path="/checkout/:order_oid/" element={<Checkout />} />
 							<Route

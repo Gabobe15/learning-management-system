@@ -45,7 +45,7 @@ function CourseDetail() {
 	const fetchCourse = () => {
 		setIsLoading(true);
 		useAxios()
-			.get(`course/course-detail/${params.slug}/`)
+			.get(`course/course-detail/${params?.course_id}/`)
 			.then((res) => {
 				setCourse(res.data);
 				setIsLoading(false);

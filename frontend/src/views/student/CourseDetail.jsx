@@ -1,9 +1,10 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useRef } from 'react';
 
 import { useParams } from 'react-router-dom';
 import ReactPlayer from 'react-player';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import moment from 'moment';
 
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
@@ -12,7 +13,6 @@ import Header from './Partials/Header';
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 import Toast from '../plugin/Toast';
-import apiInstance from '../../utils/axios';
 
 function CourseDetail() {
 	const [course, setCourse] = useState([]);
@@ -20,8 +20,16 @@ function CourseDetail() {
 	const [variantItem, setVariantItem] = useState(null);
 	const [completePercentage, setCompletePercentage] = useState(0);
 	const [markAsCompletedStatus, setMarkAsCompletedStatus] = useState({});
-	const [createNote, setCreateNote] = useState({ title: '', note: '' });
-	const [selectedNote, setSelectedNote] = useState(null);
+	const [createNote, setCreateNote] = useState({ title: '', note: '' }); //create note
+	const [selectedNote, setSelectedNote] = useState(null); //edit note
+	const [createMessage, setCreateMessage] = useState({
+		title: '',
+		message: '',
+	});
+	const [questions, setQuestions] = useState([]); //ask question
+	const [selectedConverstation, setSelectedConversation] = useState(null);
+
+	const lastElementRef = useRef();
 
 	// play lecturer
 	const [show, setShow] = useState(false);
@@ -41,10 +49,18 @@ function CourseDetail() {
 
 	const [ConversationShow, setConversationShow] = useState(false);
 	const handleConversationClose = () => setConversationShow(false);
-	const handleConversationShow = () => {
+	const handleConversationShow = (conversation) => {
 		setConversationShow(true);
+		setSelectedConversation(conversation);
 	};
 
+	const [addQuestionShow, setAddQuestionShow] = useState(false);
+	const handleQuestionClose = () => setAddQuestionShow(false);
+	const handleQuestionShow = () => {
+		setAddQuestionShow(true);
+	};
+
+	// retrieve eveything
 	const fetchCourseDetail = async () => {
 		useAxios()
 			.get(
@@ -52,6 +68,7 @@ function CourseDetail() {
 			)
 			.then((res) => {
 				setCourse(res.data);
+				setQuestions(res?.data?.question_answer);
 				const percentageCompleted =
 					(res?.data?.completed_lesson?.length / res?.data?.lectures?.length) *
 					100;
@@ -63,6 +80,7 @@ function CourseDetail() {
 		fetchCourseDetail();
 	}, []);
 
+	// complete lesson
 	const handleMarkLessonAsCompleted = (variantItemId) => {
 		const key = `lecture_${variantItemId}`;
 		setMarkAsCompletedStatus({
@@ -86,6 +104,7 @@ function CourseDetail() {
 			});
 	};
 
+	// change note functionality
 	const handleNoteChange = (e) => {
 		setCreateNote({
 			...createNote,
@@ -93,6 +112,7 @@ function CourseDetail() {
 		});
 	};
 
+	// create note
 	const handleSubmitCreateNote = async (e) => {
 		e.preventDefault();
 
@@ -124,6 +144,7 @@ function CourseDetail() {
 		}
 	};
 
+	// submit edit note back to api
 	const handleSubmitEditNote = (e, noteId) => {
 		e.preventDefault();
 		const formdata = new FormData();
@@ -149,9 +170,13 @@ function CourseDetail() {
 				});
 			});
 	};
-
+	// delete note from api
 	const handleDeleteNote = (noteId) => {
-		useAxios().delete(`student/course-note-detail/${UserData()?.user_id}/${param?.enrollment_id}/${noteId}/`).then((res) => {
+		useAxios()
+			.delete(
+				`student/course-note-detail/${UserData()?.user_id}/${param?.enrollment_id}/${noteId}/`
+			)
+			.then((res) => {
 				console.log(res.data);
 				fetchCourseDetail();
 				handleNoteClose();
@@ -159,8 +184,64 @@ function CourseDetail() {
 					icon: 'success',
 					title: 'Note deleted',
 				});
-		})
-	}
+			});
+	};
+
+	const handleMessageChange = (e) => {
+		setCreateMessage({
+			...createMessage,
+			[e.target.name]: e.target.value,
+		});
+	};
+
+	// ask question
+	const handleSaveQuestion = async (e) => {
+		e.preventDefault();
+
+		const formdata = new FormData();
+		formdata.append('course_id', course?.course?.id);
+		formdata.append('user_id', UserData()?.user_id);
+		formdata.append('title', createMessage.title);
+		formdata.append('message', createMessage.message);
+
+		await useAxios()
+			.post(
+				`student/question-answer-list-create/${course?.course?.id}/`,
+				formdata
+			)
+			.then((res) => {
+				console.log(res.data);
+				fetchCourseDetail();
+				handleQuestionClose();
+				Toast().fire({
+					icon: 'success',
+					title: 'Question sent',
+				});
+			});
+	};
+
+	const sendMessage = async (e) => {
+		e.preventDefault();
+		const formdata = new FormData();
+
+		formdata.append('course_id', course?.course?.id);
+		formdata.append('user_id', UserData()?.user_id);
+		formdata.append('message', createMessage?.message);
+		formdata.append('qa_id', selectedConverstation?.qa_id);
+
+		useAxios()
+			.post(`student/question-answer-message-create/`, formdata)
+			.then((res) => {
+				console.log(res.data);
+				setSelectedConversation(res.data?.question);
+			});
+	};
+// lastElementRef --- will enable to scroll automatically to the button 
+	useEffect(() => {
+		if (lastElementRef.current) {
+			lastElementRef.current.scrollIntoView({ behavior: 'smooth' });
+		}
+	}, [selectedConverstation]);
 
 	return (
 		<>
@@ -493,7 +574,9 @@ function CourseDetail() {
 																						Edit
 																					</a>
 																					<a
-																						onClick={() => handleDeleteNote(n?.id)}
+																						onClick={() =>
+																							handleDeleteNote(n?.id)
+																						}
 																						className="btn btn-danger mb-0"
 																					>
 																						<i className="bi bi-trash me-2" />{' '}
@@ -541,7 +624,7 @@ function CourseDetail() {
 																		</div>
 																		<div className="col-sm-6 col-lg-3">
 																			<a
-																				href="#"
+																				onClick={handleQuestionShow}
 																				className="btn btn-primary mb-0 w-100"
 																				data-bs-toggle="modal"
 																				data-bs-target="#modalCreatePost"
@@ -555,44 +638,55 @@ function CourseDetail() {
 																<div className="card-body p-0 pt-3">
 																	<div className="vstack gap-3 p-3">
 																		{/* Question item START */}
-																		<div className="shadow rounded-3 p-3">
-																			<div className="d-sm-flex justify-content-sm-between mb-3">
-																				<div className="d-flex align-items-center">
-																					<div className="avatar avatar-sm flex-shrink-0">
-																						<img
-																							src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-3.jpg"
-																							className="avatar-img rounded-circle"
-																							alt="avatar"
-																							style={{
-																								width: '60px',
-																								height: '60px',
-																								borderRadius: '50%',
-																								objectFit: 'cover',
-																							}}
-																						/>
-																					</div>
-																					<div className="ms-2">
-																						<h6 className="mb-0">
-																							<a
-																								href="#"
-																								className="text-decoration-none text-dark"
-																							>
-																								Angelina Poi
-																							</a>
-																						</h6>
-																						<small>Asked 10 Hours ago</small>
+																		{questions?.map((q, index) => (
+																			<div
+																				className="shadow rounded-3 p-3"
+																				key={index}
+																			>
+																				<div className="d-sm-flex justify-content-sm-between mb-3">
+																					<div className="d-flex align-items-center">
+																						<div className="avatar avatar-sm flex-shrink-0">
+																							<img
+																								src={q?.profile.image}
+																								className="avatar-img rounded-circle"
+																								alt="avatar"
+																								style={{
+																									width: '60px',
+																									height: '60px',
+																									borderRadius: '50%',
+																									objectFit: 'cover',
+																								}}
+																							/>
+																						</div>
+																						<div className="ms-2">
+																							<h6 className="mb-0">
+																								<a
+																									href="#"
+																									className="text-decoration-none text-dark"
+																								>
+																									{q?.profile.full_name}
+																								</a>
+																							</h6>
+																							<small>
+																								{moment(q?.date).format(
+																									'DD MMM, YYYY ---- HH:mm A'
+																								)}
+																							</small>
+																						</div>
 																					</div>
 																				</div>
+																				<h5>{q?.title}</h5>
+																				<button
+																					className="btn btn-primary btn-sm mb-3 mt-3"
+																					onClick={() =>
+																						handleConversationShow(q)
+																					}
+																				>
+																					Join Conversation{' '}
+																					<i className="fas fa-arrow-right"></i>
+																				</button>
 																			</div>
-																			<h5>How can i fix this bug?</h5>
-																			<button
-																				className="btn btn-primary btn-sm mb-3 mt-3"
-																				onClick={handleConversationShow}
-																			>
-																				Join Conversation{' '}
-																				<i className="fas fa-arrow-right"></i>
-																			</button>
-																		</div>
+																		))}
 																	</div>
 																</div>
 															</div>
@@ -726,10 +820,10 @@ function CourseDetail() {
 				</Modal.Body>
 			</Modal>
 
-			{/* Note Edit Modal */}
+			{/* Conversation Modal */}
 			<Modal show={ConversationShow} size="lg" onHide={handleConversationClose}>
 				<Modal.Header closeButton>
-					<Modal.Title>Lesson: 123</Modal.Title>
+					<Modal.Title>Lesson: {selectedConverstation?.title}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					<div className="border p-2 p-sm-4 rounded-3">
@@ -737,202 +831,73 @@ function CourseDetail() {
 							className="list-unstyled mb-0"
 							style={{ overflowY: 'scroll', height: '500px' }}
 						>
-							<li className="comment-item mb-3">
-								<div className="d-flex">
-									<div className="avatar avatar-sm flex-shrink-0">
-										<a href="#">
-											<img
-												className="avatar-img rounded-circle"
-												src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-3.jpg"
-												style={{
-													width: '40px',
-													height: '40px',
-													borderRadius: '50%',
-													objectFit: 'cover',
-												}}
-												alt="womans image"
-											/>
-										</a>
-									</div>
-									<div className="ms-2">
-										{/* Comment by */}
-										<div className="bg-light p-3 rounded w-100">
-											<div className="d-flex w-100 justify-content-center">
-												<div className="me-2 ">
-													<h6 className="mb-1 lead fw-bold">
-														<a
-															href="#!"
-															className="text-decoration-none text-dark"
-														>
-															{' '}
-															Louis Ferguson{' '}
-														</a>
-														<br />
-														<span style={{ fontSize: '12px', color: 'gray' }}>
-															5hrs Ago
-														</span>
-													</h6>
-													<p className="mb-0 mt-3  ">
-														Removed demands expense account
-													</p>
+							{selectedConverstation?.messages?.map((m, index) => (
+								<li className="comment-item mb-3" key={index}>
+									<div className="d-flex">
+										<div className="avatar avatar-sm flex-shrink-0">
+											<a href="#">
+												<img
+													className="avatar-img rounded-circle"
+													src={
+														m?.profile?.image?.startsWith(
+															'http://127.0.0.1:8000'
+														)
+															? m.profile.image
+															: `http://127.0.0.1:8000${m.profile.image}`
+													}
+													style={{
+														width: '40px',
+														height: '40px',
+														borderRadius: '50%',
+														objectFit: 'cover',
+													}}
+													alt="womans image"
+												/>
+											</a>
+										</div>
+										<div className="ms-2">
+											{/* Comment by */}
+											<div className="bg-light p-3 rounded w-100">
+												<div className="d-flex w-100 justify-content-center">
+													<div className="me-2 ">
+														<h6 className="mb-1 lead fw-bold">
+															<a
+																href="#!"
+																className="text-decoration-none text-dark"
+															>
+																{m?.profile?.full_name}
+															</a>
+															<br />
+															<span style={{ fontSize: '12px', color: 'gray' }}>
+																{moment(m?.date).format('DD MMM, YYYY')}
+															</span>
+														</h6>
+														<p className="mb-0 mt-3  ">{m?.message}</p>
+													</div>
 												</div>
 											</div>
 										</div>
 									</div>
-								</div>
-							</li>
-
-							<li className="comment-item mb-3">
-								<div className="d-flex">
-									<div className="avatar avatar-sm flex-shrink-0">
-										<a href="#">
-											<img
-												className="avatar-img rounded-circle"
-												src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-3.jpg"
-												style={{
-													width: '40px',
-													height: '40px',
-													borderRadius: '50%',
-													objectFit: 'cover',
-												}}
-												alt="womans image"
-											/>
-										</a>
-									</div>
-									<div className="ms-2">
-										{/* Comment by */}
-										<div className="bg-light p-3 rounded w-100">
-											<div className="d-flex w-100 justify-content-center">
-												<div className="me-2 ">
-													<h6 className="mb-1 lead fw-bold">
-														<a
-															href="#!"
-															className="text-decoration-none text-dark"
-														>
-															{' '}
-															Louis Ferguson{' '}
-														</a>
-														<br />
-														<span style={{ fontSize: '12px', color: 'gray' }}>
-															5hrs Ago
-														</span>
-													</h6>
-													<p className="mb-0 mt-3  ">
-														Removed demands expense account from the debby
-														building in a hall town tak with
-													</p>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</li>
-
-							<li className="comment-item mb-3">
-								<div className="d-flex">
-									<div className="avatar avatar-sm flex-shrink-0">
-										<a href="#">
-											<img
-												className="avatar-img rounded-circle"
-												src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-3.jpg"
-												style={{
-													width: '40px',
-													height: '40px',
-													borderRadius: '50%',
-													objectFit: 'cover',
-												}}
-												alt="womans image"
-											/>
-										</a>
-									</div>
-									<div className="ms-2">
-										{/* Comment by */}
-										<div className="bg-light p-3 rounded w-100">
-											<div className="d-flex w-100 justify-content-center">
-												<div className="me-2 ">
-													<h6 className="mb-1 lead fw-bold">
-														<a
-															href="#!"
-															className="text-decoration-none text-dark"
-														>
-															{' '}
-															Louis Ferguson{' '}
-														</a>
-														<br />
-														<span style={{ fontSize: '12px', color: 'gray' }}>
-															5hrs Ago
-														</span>
-													</h6>
-													<p className="mb-0 mt-3  ">
-														Removed demands expense account
-													</p>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</li>
-
-							<li className="comment-item mb-3">
-								<div className="d-flex">
-									<div className="avatar avatar-sm flex-shrink-0">
-										<a href="#">
-											<img
-												className="avatar-img rounded-circle"
-												src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-3.jpg"
-												style={{
-													width: '40px',
-													height: '40px',
-													borderRadius: '50%',
-													objectFit: 'cover',
-												}}
-												alt="womans image"
-											/>
-										</a>
-									</div>
-									<div className="ms-2">
-										{/* Comment by */}
-										<div className="bg-light p-3 rounded w-100">
-											<div className="d-flex w-100 justify-content-center">
-												<div className="me-2 ">
-													<h6 className="mb-1 lead fw-bold">
-														<a
-															href="#!"
-															className="text-decoration-none text-dark"
-														>
-															{' '}
-															Louis Ferguson{' '}
-														</a>
-														<br />
-														<span style={{ fontSize: '12px', color: 'gray' }}>
-															5hrs Ago
-														</span>
-													</h6>
-													<p className="mb-0 mt-3  ">
-														Removed demands expense account
-													</p>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</li>
+								</li>
+							))}
+							<div ref={lastElementRef}></div>
 						</ul>
 
-						<form className="w-100 d-flex">
+						<form className="w-100 d-flex" onSubmit={sendMessage}>
 							<textarea
 								name="message"
+								onChange={handleMessageChange}
 								className="one form-control pe-4 bg-light w-75"
 								id="autoheighttextarea"
 								rows="2"
 								placeholder="What's your question?"
 							></textarea>
-							<button className="btn btn-primary ms-2 mb-0 w-25" type="button">
+							<button className="btn btn-primary ms-2 mb-0 w-25" type="submit">
 								Post <i className="fas fa-paper-plane"></i>
 							</button>
 						</form>
 
-						<form className="w-100">
+						{/* <form className="w-100">
 							<input
 								name="title"
 								type="text"
@@ -949,8 +914,54 @@ function CourseDetail() {
 							<button className="btn btn-primary mb-0 w-25" type="button">
 								Post <i className="fas fa-paper-plane"></i>
 							</button>
-						</form>
+						</form> */}
 					</div>
+				</Modal.Body>
+			</Modal>
+
+			{/* Ask Question Modal */}
+			<Modal show={addQuestionShow} size="lg" onHide={handleQuestionClose}>
+				<Modal.Header closeButton>
+					<Modal.Title>Ask Question</Modal.Title>
+				</Modal.Header>
+				<Modal.Body>
+					<form onSubmit={handleSaveQuestion}>
+						<div className="mb-3">
+							<label htmlFor="exampleInputEmail1" className="form-label">
+								Question Title
+							</label>
+							<input
+								value={createMessage?.title}
+								name="title"
+								onChange={handleMessageChange}
+								type="text"
+								className="form-control"
+							/>
+						</div>
+						<div className="mb-3">
+							<label htmlFor="exampleInputPassword1" className="form-label">
+								Question Message
+							</label>
+							<textarea
+								onChange={handleMessageChange}
+								defaultValue={createMessage?.message}
+								name="message"
+								className="form-control"
+								cols="30"
+								rows="10"
+							></textarea>
+						</div>
+						<button
+							type="button"
+							className="btn btn-secondary me-2"
+							onClick={handleQuestionClose}
+						>
+							<i className="fas fa-arrow-left"></i> Close
+						</button>
+						<button type="submit" className="btn btn-primary">
+							Send Message <i className="fas fa-check-circle"></i>
+						</button>
+					</form>
 				</Modal.Body>
 			</Modal>
 

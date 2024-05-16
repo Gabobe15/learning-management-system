@@ -239,7 +239,7 @@ function Index() {
 									<div className="col" key={index}>
 										{/* Card */}
 										<div className="card card-hover">
-											<Link to={`/course-detail/${course.slug}/`}>
+											<Link to={`/course-detail/${course?.course_id}/`}>
 												<img
 													src={course.image}
 													alt="course"
@@ -266,12 +266,12 @@ function Index() {
 													</a>
 												</div>
 												<h4 className="mb-2 text-truncate-line-2 ">
-													<Link
-														to={`/course-detail/slug/`}
+													{/* <Link
+														to={`/course-detail/${course?.id}/`}
 														className="text-inherit text-decoration-none text-dark fs-5"
-													>
+													> */}
 														{course.title}
-													</Link>
+													{/* </Link> */}
 												</h4>
 												<small>By: {course.teacher.full_name}</small> <br />
 												<small>

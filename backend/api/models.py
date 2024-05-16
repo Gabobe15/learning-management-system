@@ -120,7 +120,7 @@ class Course(models.Model):
     
     def save(self, *args, **kwargs):
         if self.slug == "" or self.slug == None:
-            self.slug = slugify(self.title) + str(self.id)
+            self.slug = slugify(self.title) + str(self.pk)
         super(Course, self).save(*args, **kwargs)
     
     def students(self): #all student for the course
