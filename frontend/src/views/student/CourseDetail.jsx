@@ -243,6 +243,19 @@ function CourseDetail() {
 		}
 	}, [selectedConverstation]);
 
+	const handleSearchQuestion = (e) => {
+		const query = e.target.value.toLowerCase()
+		if(query === "" ){
+			fetchCourseDetail()
+		}
+		else{
+			const filtered = questions.filter(question => {
+				return question.title.toLowerCase().includes(query)
+			})
+			setQuestions(filtered)
+		}
+	}
+
 	return (
 		<>
 			<BaseHeader />
@@ -613,6 +626,7 @@ function CourseDetail() {
 																					type="search"
 																					placeholder="Search"
 																					aria-label="Search"
+																					onChange={handleSearchQuestion}
 																				/>
 																				<button
 																					className="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
@@ -669,7 +683,7 @@ function CourseDetail() {
 																							</h6>
 																							<small>
 																								{moment(q?.date).format(
-																									'DD MMM, YYYY ---- HH:mm A'
+																									'DD MMM, YYYY HH:mm A'
 																								)}
 																							</small>
 																						</div>
