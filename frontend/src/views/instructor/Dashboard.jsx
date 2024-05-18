@@ -10,7 +10,7 @@ import useAxios from '../../utils/useAxios';
 // import UserData from '../plugin/UserData';
 import { userId } from '../../utils/constant';
 import { Link } from 'react-router-dom';
-// import Toast from '../plugin/Toast';
+import Toast from '../plugin/Toast';
 
 function Dashboard() {
 	const [stats, setStats] = useState([]);
@@ -47,7 +47,18 @@ function Dashboard() {
 		}
 	};
 
-	console.log(courses);
+	const handleCourseDelete = (courseId) => {
+		useAxios()
+			.delete(`teacher/course-detail/${courseId}/`)
+			.then((res) => {
+				console.log(courseId);
+				fetchCourseData()
+				Toast().fire({
+					icon: 'success',
+					title: 'course deleted',
+				});
+			});
+	};
 
 	return (
 		<>
@@ -226,13 +237,17 @@ function Dashboard() {
 															<i className="fas fa-edit"></i>
 														</Link>
 														<button
+															onClick={() => handleCourseDelete(c?.course_id)}
 															className="btn btn-danger btn-sm mt-3 me-1"
 														>
 															<i className="fas fa-trash"></i>
 														</button>
-														<button className="btn btn-secondary btn-sm mt-3 me-1">
+														<Link
+															to={`/course-detail/${c?.course_id}/`}
+															className="btn btn-secondary btn-sm mt-3 me-1"
+														>
 															<i className="fas fa-eye"></i>
-														</button>
+														</Link>
 													</td>
 												</tr>
 											))}

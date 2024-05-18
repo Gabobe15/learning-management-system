@@ -10,6 +10,7 @@ import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 import { Link } from 'react-router-dom';
 import { userId } from '../../utils/constant';
+import Toast from '../plugin/Toast';
 
 function Courses() {
 	const [courses, setCourses] = useState([]);
@@ -38,6 +39,18 @@ function Courses() {
 			});
 			setCourses(filtered);
 		}
+	};
+
+	const handleCourseDelete = (courseId) => {
+		useAxios()
+			.delete(`teacher/course-detail/${courseId}/`)
+			.then((res) => {
+				fetchCourseData();
+				Toast().fire({
+					icon: 'success',
+					title: 'course deleted',
+				});
+			});
 	};
 
 	return (
@@ -166,12 +179,18 @@ function Courses() {
 														>
 															<i className="fas fa-edit"></i>
 														</Link>
-														<button className="btn btn-danger btn-sm mt-3 me-1">
+														<button
+															onClick={() => handleCourseDelete(c?.course_id)}
+															className="btn btn-danger btn-sm mt-3 me-1"
+														>
 															<i className="fas fa-trash"></i>
 														</button>
-														<button className="btn btn-secondary btn-sm mt-3 me-1">
+														<Link
+															to={`/course-detail/${c?.course_id}/`}
+															className="btn btn-secondary btn-sm mt-3 me-1"
+														>
 															<i className="fas fa-eye"></i>
-														</button>
+														</Link>
 													</td>
 												</tr>
 											))}
