@@ -44,7 +44,7 @@ import TeacherNotification from './views/instructor/TeacherNotification';
 import QA from './views/instructor/QA';
 import InstructorChangePassword from './views/instructor/ChangePassword';
 import IProfile from './views/instructor/Profile';
-import QADetail from './views/instructor/QADetail';
+// import QADetail from './views/instructor/QADetail';
 import CourseCreate from './views/instructor/CourseCreate';
 import CourseEdit from './views/instructor/CourseEdit';
 import About from './views/base/About';
@@ -129,7 +129,7 @@ function App() {
 								element={<TeacherNotification />}
 							/>
 							<Route path="/instructor/question-answer/" element={<QA />} />
-							<Route path="/instructor/quiz/" element={<QADetail />} />
+							{/* <Route path="/instructor/quiz/" element={<QADetail />} /> */}
 							<Route
 								path="/instructor/change-password/"
 								element={<InstructorChangePassword />}

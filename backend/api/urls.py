@@ -71,4 +71,6 @@ urlpatterns = [
     path('teacher/course-variant-item-delete/<variant_id>/<variant_item_id>/<teacher_id>/<course_id>/', api_views.CourseVariantItemDeleteAPIView.as_view()),
     
     
+    
+    
 ]

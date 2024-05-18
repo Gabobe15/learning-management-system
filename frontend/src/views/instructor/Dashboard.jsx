@@ -7,9 +7,10 @@ import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 
 import useAxios from '../../utils/useAxios';
-import UserData from '../plugin/UserData';
+// import UserData from '../plugin/UserData';
 import { userId } from '../../utils/constant';
 import { Link } from 'react-router-dom';
+// import Toast from '../plugin/Toast';
 
 function Dashboard() {
 	const [stats, setStats] = useState([]);
@@ -19,14 +20,12 @@ function Dashboard() {
 		useAxios()
 			.get(`teacher/summary/${userId}/`)
 			.then((res) => {
-				console.log(res.data[0]);
 				setStats(res.data[0]);
 			});
 
 		useAxios()
 			.get(`teacher/course-lists/${userId}/`)
 			.then((res) => {
-				console.log(res.data);
 				setCourses(res.data);
 			});
 	};
@@ -47,6 +46,8 @@ function Dashboard() {
 			setCourses(filtered);
 		}
 	};
+
+	console.log(courses);
 
 	return (
 		<>
@@ -224,7 +225,9 @@ function Dashboard() {
 														>
 															<i className="fas fa-edit"></i>
 														</Link>
-														<button className="btn btn-danger btn-sm mt-3 me-1">
+														<button
+															className="btn btn-danger btn-sm mt-3 me-1"
+														>
 															<i className="fas fa-trash"></i>
 														</button>
 														<button className="btn btn-secondary btn-sm mt-3 me-1">

@@ -9,23 +9,18 @@ import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 
 import useAxios from '../../utils/useAxios';
-import Toast from '../plugin/Toast';
-import { serverUrl, userId } from '../../utils/constant';
-import UserData from '../plugin/UserData';
-import apiInstance from '../../utils/axios';
+import {userId } from '../../utils/constant';
 
 function Students() {
 	const [students, setStudents] = useState([]);
 	useEffect(() => {
 		useAxios()
-			.get(`teacher/student-lists/${UserData()?.user_id}/`)
+			.get(`teacher/student-lists/${userId}/`)
 			.then((res) => {
-				console.log(res.data);
 				setStudents(res.data);
 			});
-	},[]);
 
-	console.log(students);
+	},[]);
 	return (
 		<>
 			<BaseHeader />

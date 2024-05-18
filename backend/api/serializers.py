@@ -77,6 +77,7 @@ class VariantItemSerializer(serializers.ModelSerializer):
 class VariantSerializer(serializers.ModelSerializer):
     variant_items = VariantItemSerializer(many=True)
     items = VariantItemSerializer(many=True)
+    
     class Meta:
         model = api_models.Variant
         fields = '__all__' 

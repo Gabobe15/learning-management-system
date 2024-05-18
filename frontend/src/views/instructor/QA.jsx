@@ -23,7 +23,6 @@ function QA() {
 		useAxios()
 			.get(`teacher/question-answer-list/${UserData()?.user_id}/`)
 			.then((res) => {
-				console.log(res.data);
 				setQuestions(res.data);
 			});
 	};
@@ -148,7 +147,7 @@ function QA() {
 																</a>
 															</h6>
 															<small>
-																{moment(q.data).format('DD MMM, YYYY')}
+																{moment(q.data).format('DD MMM, YYYY HH:mm A')}
 															</small>
 														</div>
 													</div>

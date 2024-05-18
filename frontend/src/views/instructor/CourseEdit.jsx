@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
@@ -7,6 +6,7 @@ import Sidebar from './Partials/Header';
 import Header from './Partials/Header';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
+import { Link, useParams } from 'react-router-dom';
 
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
@@ -25,9 +25,13 @@ function CourseEdit() {
 		language: '',
 		teacher_course_status: '',
 	});
+
 	const [category, setCategory] = useState([]);
 	const [progress, setProgress] = useState(0);
 	const [ckEditorData, setCKEitorData] = useState('');
+
+	const param = useParams();
+
 
 	const [variants, setVariants] = useState([
 		{
@@ -36,20 +40,17 @@ function CourseEdit() {
 		},
 	]);
 
-	const param = useParams();
 
 	const fetchCourseDetail = () => {
 		useAxios()
 			.get(`course/category/`)
 			.then((res) => {
-				console.log(res.data);
 				setCategory(res.data);
 			});
 
 		useAxios()
 			.get(`teacher/course-detail/${param.course_id}/`)
 			.then((res) => {
-				console.log(res.data);
 				setCourse(res.data);
 				setVariants(res.data?.curriculum);
 				setCKEitorData(res.data?.description);
@@ -71,12 +72,10 @@ function CourseEdit() {
 	const handleCKEditorChange = (e, editor) => {
 		const data = editor.getData();
 		setCKEitorData(data);
-		console.log(ckEditorData);
 	};
 
 	const handleCourseImageChange = (e) => {
 		const file = e.target.files[0];
-		console.log(file);
 
 		if (file) {
 			const reader = new FileReader();
@@ -104,9 +103,6 @@ function CourseEdit() {
 		const updatedVariant = [...variants];
 		updatedVariant[index][propertyName] = value; //using index and property name grab the value
 		setVariants(updatedVariant);
-
-		console.log(`Name ${propertyName} - value ${value} - index${index}`);
-		console.log(variants);
 	};
 
 	const handleItemChange = (
@@ -141,7 +137,6 @@ function CourseEdit() {
 				`teacher/course-variant-delete/${variantId}/${UserData()?.user_id}/${param?.course_id}/`
 			)
 			.then((res) => {
-				console.log(res.data);
 				fetchCourseDetail();
 				Toast().fire({
 					icon: 'success',
@@ -171,7 +166,6 @@ function CourseEdit() {
 				`teacher/course-variant-item-delete/${variantId}/${itemId}/${UserData()?.user_id}/${param?.course_id}/`
 			)
 			.then((res) => {
-				console.log(res.data);
 				fetchCourseDetail();
 				Toast().fire({
 					icon: 'success',
@@ -184,26 +178,25 @@ function CourseEdit() {
 		e.preventDefault();
 		const formdata = new FormData();
 
-		formdata.append('title', course.title);
+		formdata.append('title', course?.title);
 		formdata.append('description', ckEditorData);
-		formdata.append('category', course.category);
-		formdata.append('price', course.price);
-		formdata.append('level', course.level);
-		formdata.append('language', course.language);
+		formdata.append('category', course?.category);
+		formdata.append('price', course?.price);
+		formdata.append('level', course?.level);
+		formdata.append('language', course?.language);
 		formdata.append('teacher', parseInt(UserData()?.user_id));
 
-		if (course.file != null || course.file != '') {
-			formdata.append('file', course.file || '');
+		if (course.file != null || course?.file != '') {
+			formdata.append('file', course?.file || '');
 		}
 		if (course?.image?.file) {
-			formdata.append('image', course?.image?.file);
+			formdata.append('image', course.image.file);
 		}
 		// console.log(course.category.id);
 		// console.log(course.category);
 
 		variants.forEach((variant, variantIndex) => {
 			Object.entries(variant).forEach(([key, value]) => {
-				console.log(`Key ${key} = value ${value}`);
 				formdata.append(
 					`variants[${variantIndex}][variant_${key}]`,
 					String(value)
@@ -220,14 +213,14 @@ function CourseEdit() {
 			});
 		});
 
-		const response = useAxios().patch(
+		const response = await useAxios().patch(
 			`teacher/course-update/${UserData()?.user_id}/${param?.course_id}/`,
 			formdata
 		);
-		console.log((await response).data);
+		console.log(response);
 		Swal.fire({
 			icon: 'success',
-			title: 'Course Updated  successfully.',
+			title: 'Course Updated Successfully.',
 		});
 	};
 
@@ -266,12 +259,12 @@ function CourseEdit() {
 															<i className="fas fa-arrow-left"></i> Back to
 															Course
 														</Link>
-														<a
-															href="instructor-courses.html"
+														<Link
+															href="instructor-courses/"
 															className="btn btn-dark ms-2"
 														>
 															Save <i className="fas fa-check-circle"></i>
-														</a>
+														</Link>
 													</div>
 												</div>
 											</div>
@@ -337,8 +330,8 @@ function CourseEdit() {
 													type="text"
 													placeholder=""
 													name="title"
-													onChange={handleCourseInputChange}
 													defaultValue={course?.title}
+													onChange={handleCourseInputChange}
 												/>
 												<small>Write a 60 character course title.</small>
 											</div>
@@ -350,7 +343,6 @@ function CourseEdit() {
 													onChange={handleCourseInputChange}
 													value={course?.category?.id}
 												>
-													<option value="">-------------</option>
 													{category?.map((c, index) => (
 														<option key={index} value={c?.id}>
 															{c?.title}
@@ -398,7 +390,7 @@ function CourseEdit() {
 													onChange={handleCKEditorChange}
 													style={{ height: '400px' }}
 													name="description"
-													value={course?.description}
+													value={course?.description || ""}
 												/>
 												<small>A brief summary of your courses.</small>
 											</div>
@@ -463,7 +455,7 @@ function CourseEdit() {
 																placeholder="Lesson Title"
 																className="form-control me-1 mt-2"
 																name="title"
-																value={item?.title}
+																value={item.title}
 																onChange={(e) =>
 																	handleItemChange(
 																		variantIndex,
@@ -476,7 +468,7 @@ function CourseEdit() {
 															/>
 															<textarea
 																name="description"
-																value={item?.description}
+																value={item.description}
 																id=""
 																cols="30"
 																className="form-control mt-2"
@@ -518,7 +510,7 @@ function CourseEdit() {
 																		type="checkbox"
 																		className="form-check-input ms-2"
 																		name=""
-																		value={item?.preview}
+																		checked={item.preview}
 																		id={`checkbox${1}`}
 																		onChange={(e) =>
 																			handleItemChange(
@@ -570,7 +562,7 @@ function CourseEdit() {
 										className="btn btn-lg btn-success w-100 mt-2"
 										type="submit"
 									>
-										Create Course <i className="fas fa-check-circle"></i>
+										Update Course <i className="fas fa-check-circle"></i>
 									</button>
 								</section>
 							</>
