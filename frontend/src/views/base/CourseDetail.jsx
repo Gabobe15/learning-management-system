@@ -34,6 +34,7 @@ import ReactPlayer from 'react-player';
 import Rater from 'react-rater';
 
 function CourseDetail() {
+	const [pipMode, setPipMode] = useState(false);
 	const [cartCount, setCartCount] = useContext(CartContext);
 	const country = GetCurrentAddress()?.country;
 	const userId = UserData()?.user_id;
@@ -485,7 +486,7 @@ function CourseDetail() {
 																				{r?.profile?.full_name}
 																			</h5>
 																			{/* Review star */}
-																			
+
 																			<Rater total={5} rating={r?.rating} />
 																		</div>
 																		{/* Info */}
@@ -1197,6 +1198,18 @@ function CourseDetail() {
 																			<ReactPlayer
 																				url={course?.file}
 																				controls
+																				// Disable download button
+																				config={{
+																					file: {
+																						attributes: {
+																							controlsList: 'nodownload',
+																						},
+																					},
+																				}}
+																				// Disable right click
+																				onContextMenu={(e) =>
+																					e.preventDefault()
+																				}
 																				// playing  --- will provide auto play functionality
 																				width={'100%'}
 																				height={'100%'}

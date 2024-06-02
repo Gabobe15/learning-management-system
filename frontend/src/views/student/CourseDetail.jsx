@@ -841,7 +841,9 @@ function CourseDetail() {
 																						className="form-select js-choice"
 																						name="rating"
 																						onChange={handleReviewChange}
-																						defaultValue={course?.review?.rating}
+																						defaultValue={
+																							course?.review?.rating
+																						}
 																					>
 																						<option value={1}>
 																							★☆☆☆☆ (1/5)
@@ -908,6 +910,15 @@ function CourseDetail() {
 					<ReactPlayer
 						url={variantItem?.file}
 						controls
+						config={{
+							file: {
+								attributes: {
+									controlsList: 'nodownload',
+								},
+							},
+						}}
+						// Disable right click
+						onContextMenu={(e) => e.preventDefault()}
 						// playing  --- will provide auto play functionality
 						width={'100%'}
 						height={'100%'}
