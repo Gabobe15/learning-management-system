@@ -24,7 +24,7 @@ function BaseHeader() {
 			>
 				<div className="container">
 					<Link className="navbar-brand" to="/">
-						Desphixs
+						samaha
 					</Link>
 					<button
 						className="navbar-toggler"
@@ -171,7 +171,11 @@ function BaseHeader() {
 								placeholder="Search Courses"
 								aria-label="Search Courses"
 							/>
-							<Link to='/search/' className="btn btn-outline-success w-50" type="submit">
+							<Link
+								to="/search/"
+								className="btn btn-outline-success w-50"
+								type="submit"
+							>
 								Search <i className="fas fa-search"></i>
 							</Link>
 						</form>

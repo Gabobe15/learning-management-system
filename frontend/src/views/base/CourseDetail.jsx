@@ -30,6 +30,8 @@ import moment from 'moment';
 // user_id
 import UserData from '../plugin/UserData';
 import apiInstance from '../../utils/axios';
+import ReactPlayer from 'react-player';
+import Rater from 'react-rater';
 
 function CourseDetail() {
 	const [cartCount, setCartCount] = useContext(CartContext);
@@ -38,6 +40,7 @@ function CourseDetail() {
 	// console.log(userId);
 	const params = useParams();
 	const [course, setCourse] = useState([]);
+	const [reviews, setReviews] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
 	// add to cart button
 	const [addToCartBtn, setAddToCartBtn] = useState('Add To Cart');
@@ -48,6 +51,7 @@ function CourseDetail() {
 			.get(`course/course-detail/${params?.course_id}/`)
 			.then((res) => {
 				setCourse(res.data);
+				setReviews(res.data?.reviews);
 				setIsLoading(false);
 			});
 	};
@@ -94,6 +98,8 @@ function CourseDetail() {
 			setAddToCartBtn('Add To Cart');
 		}
 	};
+
+	console.log(reviews);
 
 	return (
 		<>
@@ -400,7 +406,9 @@ function CourseDetail() {
 																		<h3 className="card-title mb-0">
 																			{course?.teacher?.full_name}
 																		</h3>
-																		<p className="mb-2">{course?.teacher.bio}</p>
+																		<p className="mb-2">
+																			{course?.teacher.bio}
+																		</p>
 																		{/* Social button */}
 																		<ul className="list-inline mb-3">
 																			<li className="list-inline-item me-3">
@@ -448,143 +456,54 @@ function CourseDetail() {
 															<h5 className="mb-4">Our Student Reviews</h5>
 														</div>
 
-														<div className="row">
-															<div className="d-md-flex my-4">
-																<div className="avatar avatar-xl me-4 flex-shrink-0">
-																	<img
-																		className="avatar-img rounded-circle"
-																		src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-1.jpg"
-																		style={{
-																			width: '50px',
-																			height: '50px',
-																			borderRadius: '50%',
-																			objectFit: 'cover',
-																		}}
-																		alt="avatar"
-																	/>
-																</div>
-																{/* Text */}
-																<div>
-																	<div className="d-sm-flex mt-1 mt-md-0 align-items-center">
-																		<h5 className="me-3 mb-0">Sam Jay</h5>
-																		{/* Review star */}
-																		<ul className="list-inline mb-0">
-																			<i className="fas fa-star text-warning" />
-																			<i className="fas fa-star text-warning" />
-																			<i className="fas fa-star text-warning" />
-																			<i className="fas fa-star text-warning" />
-																			<i className="far fa-star text-warning" />
-																		</ul>
+														{reviews?.map((r, index) => (
+															<div className="row" key={index}>
+																<div className="d-md-flex my-4">
+																	<div className="avatar avatar-xl me-4 flex-shrink-0">
+																		<img
+																			className="avatar-img rounded-circle"
+																			src={
+																				r.profile.image?.startsWith(
+																					'http://127.0.0.1:8000'
+																				)
+																					? r.profile.image
+																					: `http://127.0.0.1:8000${r.profile.image}`
+																			}
+																			style={{
+																				width: '50px',
+																				height: '50px',
+																				borderRadius: '50%',
+																				objectFit: 'cover',
+																			}}
+																			alt={r?.profile?.full_name}
+																		/>
 																	</div>
-																	{/* Info */}
-																	<p className="small mb-2">5 days ago</p>
-																	<p className="mb-2">
-																		Perceived end knowledge certainly day
-																		sweetness why cordially. Ask a quick six
-																		seven offer see among. Handsome met debating
-																		sir dwelling age material. As style lived he
-																		worse dried. Offered related so visitors we
-																		private removed. Moderate do subjects to
-																		distance.
-																	</p>
-																	{/* Like and dislike button */}
-																</div>
-															</div>
-															{/* Comment children level 1 */}
-															<hr />
-															{/* Review item END */}
-															{/* Review item START */}
-															<div className="d-md-flex my-4">
-																{/* Avatar */}
-																<div className="avatar avatar-xl me-4 flex-shrink-0">
-																	<img
-																		className="avatar-img rounded-circle"
-																		src="https://geeksui.codescandy.com/geeks/assets/images/avatar/avatar-1.jpg"
-																		style={{
-																			width: '50px',
-																			height: '50px',
-																			borderRadius: '50%',
-																			objectFit: 'cover',
-																		}}
-																		alt="avatar"
-																	/>
-																</div>
-																{/* Text */}
-																<div>
-																	<div className="d-sm-flex mt-1 mt-md-0 align-items-center">
-																		<h5 className="me-3 mb-0">Benny Doggo</h5>
-																		{/* Review star */}
-																		<ul className="list-inline mb-0">
-																			<li className="list-inline-item me-0">
-																				<i className="fas fa-star text-warning" />
-																			</li>
-																			<li className="list-inline-item me-0">
-																				<i className="fas fa-star text-warning" />
-																			</li>
-																			<li className="list-inline-item me-0">
-																				<i className="fas fa-star text-warning" />
-																			</li>
-																			<li className="list-inline-item me-0">
-																				<i className="fas fa-star text-warning" />
-																			</li>
-																			<li className="list-inline-item me-0">
-																				<i className="far fa-star text-warning" />
-																			</li>
-																		</ul>
+																	{/* Text */}
+																	<div>
+																		<div className="d-sm-flex mt-1 mt-md-0 align-items-center">
+																			<h5 className="me-3 mb-0">
+																				{r?.profile?.full_name}
+																			</h5>
+																			{/* Review star */}
+																			
+																			<Rater total={5} rating={r?.rating} />
+																		</div>
+																		{/* Info */}
+																		<p className="small mb-2">
+																			{moment(r?.profile?.date).format(
+																				'DD MMM, YYYY'
+																			)}
+																		</p>
+																		<p className="mb-2">{r?.review}</p>
+																		{/* Like and dislike button */}
 																	</div>
-																	{/* Info */}
-																	<p className="small mb-2">2 days ago</p>
-																	<p className="mb-2">
-																		Handsome met debating sir dwelling age
-																		material. As style lived he worse dried.
-																		Offered related so visitors we private
-																		removed. Moderate do subjects to distance.
-																	</p>
 																</div>
+																<hr />
 															</div>
-															{/* Review item END */}
-															{/* Divider */}
-															<hr />
-														</div>
+														))}
 														{/* Student review END */}
 														{/* Leave Review START */}
-														<div className="mt-2">
-															<h5 className="mb-4">Leave a Review</h5>
-															<form className="row g-3">
-																{/* Rating */}
-																<div className="col-12 bg-light-input">
-																	<select
-																		id="inputState2"
-																		className="form-select js-choice"
-																	>
-																		<option selected="">★★★★★ (5/5)</option>
-																		<option>★★★★☆ (4/5)</option>
-																		<option>★★★☆☆ (3/5)</option>
-																		<option>★★☆☆☆ (2/5)</option>
-																		<option>★☆☆☆☆ (1/5)</option>
-																	</select>
-																</div>
-																{/* Message */}
-																<div className="col-12 bg-light-input">
-																	<textarea
-																		className="form-control"
-																		id="exampleFormControlTextarea1"
-																		placeholder="Your review"
-																		rows={3}
-																		defaultValue={''}
-																	/>
-																</div>
-																{/* Button */}
-																<div className="col-12">
-																	<button
-																		type="submit"
-																		className="btn btn-primary mb-0"
-																	>
-																		Post Review
-																	</button>
-																</div>
-															</form>
-														</div>
+
 														{/* Leave Review END */}
 													</div>
 													{/* Content END */}
@@ -1274,7 +1193,15 @@ function CourseDetail() {
 																				aria-label="Close"
 																			/>
 																		</div>
-																		<div className="modal-body">...</div>
+																		<div className="modal-body">
+																			<ReactPlayer
+																				url={course?.file}
+																				controls
+																				// playing  --- will provide auto play functionality
+																				width={'100%'}
+																				height={'100%'}
+																			/>
+																		</div>
 																		<div className="modal-footer">
 																			<button
 																				type="button"
@@ -1429,35 +1356,30 @@ function CourseDetail() {
 																<i className="fas fa-fw fa-book-open text-primary me-2" />
 																Lectures
 															</span>
-															<span>30</span>
-														</li>
-														<li className="list-group-item d-flex justify-content-between align-items-center d-none">
-															<span className="h6 fw-light mb-0">
-																<i className="fas fa-fw fa-clock text-primary me-2" />
-																Duration
-															</span>
-															<span>4h 50m</span>
+															<span>{course?.lectures.length}</span>
 														</li>
 														<li className="list-group-item d-flex justify-content-between align-items-center">
 															<span className="h6 fw-light mb-0">
 																<i className="fas fa-fw fa-signal text-primary me-2" />
 																Skills
 															</span>
-															<span>Beginner</span>
+															<span>{course?.level}</span>
 														</li>
 														<li className="list-group-item d-flex justify-content-between align-items-center">
 															<span className="h6 fw-light mb-0">
 																<i className="fas fa-fw fa-globe text-primary me-2" />
 																Language
 															</span>
-															<span>English</span>
+															<span>{course?.language}</span>
 														</li>
 														<li className="list-group-item d-flex justify-content-between align-items-center">
 															<span className="h6 fw-light mb-0">
 																<i className="fas fa-fw fa-user-clock text-primary me-2" />
 																Published
 															</span>
-															<span>7th August, 2025</span>
+															<span>
+																{moment(course?.date).format('DD MMM, YYYY')}
+															</span>
 														</li>
 														<li className="list-group-item d-flex justify-content-between align-items-center">
 															<span className="h6 fw-light mb-0">
@@ -1476,284 +1398,6 @@ function CourseDetail() {
 									{/* Right sidebar END */}
 								</div>
 								{/* Row END */}
-							</div>
-						</section>
-						<section className="mb-5">
-							<div className="container mb-lg-8 ">
-								<div className="row mb-5 mt-3">
-									{/* col */}
-									<div className="col-12">
-										<div className="mb-6">
-											<h2 className="mb-1 h1">Related Courses</h2>
-											<p>
-												These are the most popular courses among Geeks Courses
-												learners worldwide in year 2022
-											</p>
-										</div>
-									</div>
-								</div>
-								<div className="row">
-									<div className="col-md-12">
-										<div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-											<div className="col">
-												{/* Card */}
-												<div className="card card-hover">
-													<Link to={`/course-detail/slug/`}>
-														<img
-															src="https://geeksui.codescandy.com/geeks/assets/images/course/course-css.jpg"
-															alt="course"
-															className="card-img-top"
-														/>
-													</Link>
-													{/* Card Body */}
-													<div className="card-body">
-														<div className="d-flex justify-content-between align-items-center mb-3">
-															<span className="badge bg-info">
-																Intermediate
-															</span>
-															<a href="#" className="fs-5">
-																<i className="fas fa-heart text-danger align-middle" />
-															</a>
-														</div>
-														<h4 className="mb-2 text-truncate-line-2 ">
-															<Link
-																to={`/course-detail/slug/`}
-																className="text-inherit text-decoration-none text-dark fs-5"
-															>
-																How to easily create a website with JavaScript
-															</Link>
-														</h4>
-														<small>By: Claire Evans</small> <br />
-														<small>16k Students</small> <br />
-														<div className="lh-1 mt-3 d-flex">
-															<span className="align-text-top">
-																<span className="fs-6">
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star-half text-warning"></i>
-																</span>
-															</span>
-															<span className="text-warning">4.5</span>
-															<span className="fs-6 ms-2">(9,300)</span>
-														</div>
-													</div>
-													{/* Card Footer */}
-													<div className="card-footer">
-														<div className="row align-items-center g-0">
-															<div className="col">
-																<h5 className="mb-0">$39.00</h5>
-															</div>
-															<div className="col-auto">
-																<a
-																	href="#"
-																	className="text-inherit text-decoration-none btn btn-primary"
-																>
-																	<i className="fas fa-shopping-cart text-primary align-middle me-2 text-white" />
-																	Enroll Now
-																</a>
-															</div>
-														</div>
-													</div>
-												</div>
-											</div>
-
-											<div className="col">
-												{/* Card */}
-												<div className="card card-hover">
-													<Link to={`/course-detail/slug/`}>
-														<img
-															src="https://geeksui.codescandy.com/geeks/assets/images/course/course-angular.jpg"
-															alt="course"
-															className="card-img-top"
-														/>
-													</Link>
-													{/* Card Body */}
-													<div className="card-body">
-														<div className="d-flex justify-content-between align-items-center mb-3">
-															<span className="badge bg-info">
-																Intermediate
-															</span>
-															<a href="#" className="fs-5">
-																<i className="fas fa-heart text-danger align-middle" />
-															</a>
-														</div>
-														<h4 className="mb-2 text-truncate-line-2 ">
-															<Link
-																to={`/course-detail/slug/`}
-																className="text-inherit text-decoration-none text-dark fs-5"
-															>
-																How to easily create a website with JavaScript
-															</Link>
-														</h4>
-														<small>By: Claire Evans</small> <br />
-														<small>16k Students</small> <br />
-														<div className="lh-1 mt-3 d-flex">
-															<span className="align-text-top">
-																<span className="fs-6">
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star-half text-warning"></i>
-																</span>
-															</span>
-															<span className="text-warning">4.5</span>
-															<span className="fs-6 ms-2">(9,300)</span>
-														</div>
-													</div>
-													{/* Card Footer */}
-													<div className="card-footer">
-														<div className="row align-items-center g-0">
-															<div className="col">
-																<h5 className="mb-0">$39.00</h5>
-															</div>
-															<div className="col-auto">
-																<a
-																	href="#"
-																	className="text-inherit text-decoration-none btn btn-primary"
-																>
-																	<i className="fas fa-shopping-cart text-primary align-middle me-2 text-white" />
-																	Enroll Now
-																</a>
-															</div>
-														</div>
-													</div>
-												</div>
-											</div>
-
-											<div className="col">
-												{/* Card */}
-												<div className="card card-hover">
-													<Link to={`/course-detail/slug/`}>
-														<img
-															src="https://geeksui.codescandy.com/geeks/assets/images/course/course-react.jpg"
-															alt="course"
-															className="card-img-top"
-														/>
-													</Link>
-													{/* Card Body */}
-													<div className="card-body">
-														<div className="d-flex justify-content-between align-items-center mb-3">
-															<span className="badge bg-info">
-																Intermediate
-															</span>
-															<a href="#" className="fs-5">
-																<i className="fas fa-heart text-danger align-middle" />
-															</a>
-														</div>
-														<h4 className="mb-2 text-truncate-line-2 ">
-															<Link
-																to={`/course-detail/slug/`}
-																className="text-inherit text-decoration-none text-dark fs-5"
-															>
-																Learn React.Js for Beginners from Start to
-																Finish
-															</Link>
-														</h4>
-														<small>By: Claire Evans</small> <br />
-														<small>16k Students</small> <br />
-														<div className="lh-1 mt-3 d-flex">
-															<span className="align-text-top">
-																<span className="fs-6">
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star-half text-warning"></i>
-																</span>
-															</span>
-															<span className="text-warning">4.5</span>
-															<span className="fs-6 ms-2">(9,300)</span>
-														</div>
-													</div>
-													{/* Card Footer */}
-													<div className="card-footer">
-														<div className="row align-items-center g-0">
-															<div className="col">
-																<h5 className="mb-0">$39.00</h5>
-															</div>
-															<div className="col-auto">
-																<a
-																	href="#"
-																	className="text-inherit text-decoration-none btn btn-primary"
-																>
-																	<i className="fas fa-shopping-cart text-primary align-middle me-2 text-white" />
-																	Enroll Now
-																</a>
-															</div>
-														</div>
-													</div>
-												</div>
-											</div>
-
-											<div className="col">
-												{/* Card */}
-												<div className="card card-hover">
-													<Link to={`/course-detail/slug/`}>
-														<img
-															src="https://geeksui.codescandy.com/geeks/assets/images/course/course-python.jpg"
-															alt="course"
-															className="card-img-top"
-														/>
-													</Link>
-													{/* Card Body */}
-													<div className="card-body">
-														<div className="d-flex justify-content-between align-items-center mb-3">
-															<span className="badge bg-info">
-																Intermediate
-															</span>
-															<a href="#" className="fs-5">
-																<i className="fas fa-heart text-danger align-middle" />
-															</a>
-														</div>
-														<h4 className="mb-2 text-truncate-line-2 ">
-															<Link
-																to={`/course-detail/slug/`}
-																className="text-inherit text-decoration-none text-dark fs-5"
-															>
-																How to easily create a website with JavaScript
-															</Link>
-														</h4>
-														<small>By: Claire Evans</small> <br />
-														<small>16k Students</small> <br />
-														<div className="lh-1 mt-3 d-flex">
-															<span className="align-text-top">
-																<span className="fs-6">
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star text-warning"></i>
-																	<i className="fas fa-star-half text-warning"></i>
-																</span>
-															</span>
-															<span className="text-warning">4.5</span>
-															<span className="fs-6 ms-2">(9,300)</span>
-														</div>
-													</div>
-													{/* Card Footer */}
-													<div className="card-footer">
-														<div className="row align-items-center g-0">
-															<div className="col">
-																<h5 className="mb-0">$39.00</h5>
-															</div>
-															<div className="col-auto">
-																<a
-																	href="#"
-																	className="text-inherit text-decoration-none btn btn-primary"
-																>
-																	<i className="fas fa-shopping-cart text-primary align-middle me-2 text-white" />
-																	Enroll Now
-																</a>
-															</div>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
 							</div>
 						</section>
 					</>

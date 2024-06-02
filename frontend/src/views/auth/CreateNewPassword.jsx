@@ -2,7 +2,7 @@ import { useState } from 'react';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import apiInstance from '../../utils/axios';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import Toast from '../plugin/Toast';
 
 function CreateNewPassword() {
@@ -11,7 +11,7 @@ function CreateNewPassword() {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const navigate = useNavigate();
-	const [searchParam] = useSearchParams();
+	const [searchParam] = useParams();
 
 	const otp = searchParam.get('otp');
 	const uuidb64 = searchParam.get('uuidb64');
@@ -50,12 +50,11 @@ function CreateNewPassword() {
 				setIsLoading(false);
 			}
 		}
-	}
+	};
 
 	return (
 		<>
 			<BaseHeader />
-
 			<section
 				className="container d-flex flex-column vh-100"
 				style={{ marginTop: '150px' }}

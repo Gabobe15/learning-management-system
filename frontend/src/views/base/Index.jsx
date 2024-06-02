@@ -31,12 +31,10 @@ function Index() {
 	const fetchCourse = async () => {
 		setIsLoading(true);
 		try {
-			await apiInstance
-				.get(`/course/course-list/`)
-				.then((res) => {
-					setCourses(res.data);
-					setIsLoading(false);
-				});
+			await apiInstance.get(`/course/course-list/`).then((res) => {
+				setCourses(res.data);
+				setIsLoading(false);
+			});
 		} catch (error) {
 			console.log(error);
 		}
@@ -133,9 +131,12 @@ function Index() {
 									world-class universities and companies.
 								</p>
 								{/* btn */}
-								<a href="#" className="btn btn-primary fs-4 text-inherit ms-3">
+								<Link
+									to="/register/"
+									className="btn btn-primary fs-4 text-inherit ms-3"
+								>
 									Join Free Now <i className="fas fa-plus"></i>
-								</a>
+								</Link>
 								<a
 									href="https://www.youtube.com/watch?v=Nfzi7034Kbg"
 									className="btn btn-outline-success fs-4 text-inherit ms-3"
@@ -270,7 +271,7 @@ function Index() {
 														to={`/course-detail/${course?.id}/`}
 														className="text-inherit text-decoration-none text-dark fs-5"
 													> */}
-														{course.title}
+													{course.title}
 													{/* </Link> */}
 												</h4>
 												<small>By: {course.teacher.full_name}</small> <br />
@@ -417,9 +418,12 @@ function Index() {
 									on Geeks. We provide the tools and skills to teach what you
 									love.
 								</p>
-								<a href="#" className="btn bg-white text-dark fw-bold mt-4">
+								<Link
+									to="/instructor/create-course/"
+									className="btn bg-white text-dark fw-bold mt-4"
+								>
 									Start Teaching Today <i className="fas fa-arrow-right"></i>
-								</a>
+								</Link>
 							</div>
 						</div>
 					</div>
@@ -461,12 +465,12 @@ function Index() {
 										</p>
 									</div>
 								</div>
-								<div className="col-lg-6 col-md-4 text-md-end mt-4 mt-md-0">
-									{/* btn */}
+								{/* btn */}
+								{/* <div className="col-lg-6 col-md-4 text-md-end mt-4 mt-md-0">
 									<a href="#" className="btn btn-primary">
 										View Reviews
 									</a>
-								</div>
+								</div> */}
 							</div>
 						</div>
 					</div>
