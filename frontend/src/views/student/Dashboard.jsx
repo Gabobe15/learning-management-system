@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import moment from 'moment';
 
 import BaseHeader from '../partials/BaseHeader';
@@ -9,7 +9,7 @@ import Header from './Partials/Header';
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 
-function Dashboard() {
+function Dashboard({ currentUser }) {
 	const [courses, setCourses] = useState([]);
 	const [stats, setStats] = useState([]);
 	const [fetching, setFetching] = useState(true);
@@ -46,8 +46,7 @@ function Dashboard() {
 		}
 	};
 
-
-	return (
+	return currentUser === 'student' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -250,6 +249,10 @@ function Dashboard() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

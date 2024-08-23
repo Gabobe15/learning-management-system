@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import moment from 'moment';
 
 import BaseHeader from '../partials/BaseHeader';
@@ -9,7 +9,7 @@ import Header from './Partials/Header';
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 
-function Courses() {
+function Courses({ currentUser }) {
 	const [courses, setCourses] = useState([]);
 	const [stats, setStats] = useState([]);
 	const [fetching, setFetching] = useState(true);
@@ -41,7 +41,7 @@ function Courses() {
 			setCourses(filtered);
 		}
 	};
-	return (
+	return currentUser === 'student' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -154,7 +154,10 @@ function Courses() {
 														</td>
 														<td>
 															{c.completed_lesson?.length < 1 && (
-																<button to={`student/courses/${c?.enrollment_id}/`} className="btn btn-success btn-sm mt-3">
+																<button
+																	to={`student/courses/${c?.enrollment_id}/`}
+																	className="btn btn-success btn-sm mt-3"
+																>
 																	start Course
 																	<i className="fas fa-arrow-right ms-2"></i>
 																</button>
@@ -185,6 +188,10 @@ function Courses() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

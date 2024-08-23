@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     #third party apps
     'rest_framework',
     'corsheaders',
-    'rest_framework_simplejwt.token_blacklist',
+    # 'rest_framework_simplejwt.token_blacklist',
     'anymail', #sending emails
     'drf_yasg',
     
@@ -152,12 +152,28 @@ AUTH_USER_MODEL = 'userauths.User'
 # EMAIL_BACKEND='anymail.backends.mailgun.EmailBackend'
 
 
+# imitate 
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = "smtp.imitate.email"
+# EMAIL_USE_TLS = True
+# EMAIL_PORT = 587  # Typically 587 for TLS or 465 for SSL
+# EMAIL_HOST_USER = "9f23fac4-17d8-4fa6-b9f8-018eb03aef31"
+# EMAIL_HOST_PASSWORD = "581e8ee3-5505-486f-8b0e-b48bf34c9dbb"
+
+
+# gmail
+
+# SMTP settings for Gmail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = "smtp.imitate.email"
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587  # TLS port
 EMAIL_USE_TLS = True
-EMAIL_PORT = 587  # Typically 587 for TLS or 465 for SSL
-EMAIL_HOST_USER = "9f23fac4-17d8-4fa6-b9f8-018eb03aef31"
-EMAIL_HOST_PASSWORD = "581e8ee3-5505-486f-8b0e-b48bf34c9dbb"
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'abdirahman.abdirizack.abdullahi@gmail.com'  # Your Gmail email address
+EMAIL_HOST_PASSWORD = 'txnseolgqcezkqfm'  # Your Gmail password or app-specific password
+
+
 FROM_EMAIL = 'samahacollege@gmail.com'
 
 DOMAIN = env("DOMAIN")
@@ -225,10 +241,10 @@ JAZZMIN_UI_TWEAKS = {
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=50),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
+    # "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
 
     "ALGORITHM": "HS256",
@@ -252,7 +268,7 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
 
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
-    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+    "SLIDING_TOKEN_LIFETIME": timedelta(hours=12),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=6),
 
 }

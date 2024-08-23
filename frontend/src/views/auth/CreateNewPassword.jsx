@@ -2,53 +2,53 @@ import { useState } from 'react';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import apiInstance from '../../utils/axios';
-import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Toast from '../plugin/Toast';
 
 function CreateNewPassword() {
+	const { token } = useParams();
 	const [password, setPassword] = useState('');
-	const [confirmPassword, setConfirmPassword] = useState('');
+	const [password2, setPassword2] = useState('');
+	const [showPassword, setShowPassword] = useState(false);
+	const [showPassword2, setShowPassword2] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+	const [errors, setErrors] = useState({});
 
 	const navigate = useNavigate();
-	const [searchParam] = useParams();
+	const validateForm = () => {
+		const newErrors = {};
+		if (!password) newErrors.password = 'Password is required.';
+		if (password !== password2) newErrors.password2 = 'Passwords do not match.';
 
-	const otp = searchParam.get('otp');
-	const uuidb64 = searchParam.get('uuidb64');
-	const refresh_token = searchParam.get('refresh_token');
+		return newErrors;
+	};
 
 	const handleCreatePassword = async (e) => {
 		e.preventDefault();
+		const validationErrors = validateForm();
+		if (Object.keys(validationErrors).length > 0) {
+			setErrors(validationErrors);
+			return; // Prevent form submission
+		}
 		setIsLoading(true);
-		if (confirmPassword !== password) {
-			Toast().fire({
-				title: 'Password does not match',
-				icon: 'warning',
-			});
-			return;
-		} else {
-			const formData = new FormData();
-			formData.append('password', password);
-			formData.append('otp', otp);
-			formData.append('uuidb64', uuidb64);
-			formData.append('refresh_token', refresh_token);
+		Toast().fire({
+			title: 'Password does not match',
+			icon: 'warning',
+		});
 
-			try {
-				await apiInstance
-					.post(`user/password-change/`, formData)
-					.then((res) => {
-						console.log(res.data);
-						setIsLoading(false);
-						Toast().fire({
-							title: res.data.message,
-							icon: 'warning',
-						});
-						navigate('/login/');
-					});
-			} catch (error) {
-				console.log(error);
+		try {
+			await apiInstance.post(`user/reset/`, { token, password }).then((res) => {
+				console.log(res.data);
 				setIsLoading(false);
-			}
+				Toast().fire({
+					title: res.data.message,
+					icon: 'warning',
+				});
+				navigate('/login/');
+			});
+		} catch (error) {
+			console.log(error);
+			setIsLoading(false);
 		}
 	};
 
@@ -72,59 +72,79 @@ function CreateNewPassword() {
 									noValidate=""
 									onSubmit={handleCreatePassword}
 								>
-									<div className="mb-3">
+									{/* Password */}
+									<div className="mb-3 position-relative">
 										<label htmlFor="password" className="form-label">
-											Enter New Password
+											Password
 										</label>
 										<input
-											type="password"
+											type={showPassword ? 'text' : 'password'}
 											id="password"
-											// onChange={handleChange}
-											className="form-control"
-											name="password"
+											className={`form-control ${errors.password ? 'is-invalid' : ''}`}
 											onChange={(e) => setPassword(e.target.value)}
+											name="password"
 											placeholder="**************"
 											required=""
 										/>
-										<div className="invalid-feedback">
-											Please enter valid password.
-										</div>
+										<i
+											className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'} position-absolute`}
+											style={{
+												cursor: 'pointer',
+												top: '75%',
+												right: '5%',
+												transform: 'translateY(-50%)',
+											}}
+											onClick={() => setShowPassword(!showPassword)}
+										></i>
+										{errors.password && (
+											<div className="invalid-feedback">{errors.password}</div>
+										)}
 									</div>
 
-									<div className="mb-3">
-										<label htmlFor="password" className="form-label">
-											Confirm New Password
+									{/* Confirm Password */}
+									<div className="mb-3 position-relative">
+										<label htmlFor="password2" className="form-label">
+											Confirm Password
 										</label>
 										<input
-											type="password"
-											id="password"
-											className="form-control"
-											name="password"
-											onChange={(e) => setConfirmPassword(e.target.value)}
+											type={showPassword2 ? 'text' : 'password'}
+											id="password2"
+											className={`form-control ${errors.password2 ? 'is-invalid' : ''}`}
+											onChange={(e) => setPassword2(e.target.value)}
+											name="password2"
 											placeholder="**************"
 											required=""
 										/>
-										<div className="invalid-feedback">
-											Please enter valid password.
-										</div>
+										<i
+											className={`fas ${showPassword2 ? 'fa-eye-slash' : 'fa-eye'} position-absolute`}
+											style={{
+												cursor: 'pointer',
+												top: '75%',
+												right: '5%',
+												transform: 'translateY(-50%)',
+											}}
+											onClick={() => setShowPassword2(!showPassword2)}
+										></i>
+										{errors.password2 && (
+											<div className="invalid-feedback">{errors.password2}</div>
+										)}
 									</div>
 
+									{/* Submit Button */}
 									<div>
 										<div className="d-grid">
 											{isLoading === true && (
 												<button
-													disabled
 													type="submit"
+													disabled
 													className="btn btn-primary"
 												>
-													Processing
-													<i className="fas fa-spinner fa-spin"></i>
+													Processing <i className="fas fa-spinner fa-spin"></i>
 												</button>
 											)}
 											{isLoading === false && (
 												<button type="submit" className="btn btn-primary">
-													Save New Password
-													<i className="fas fa-check-circle"></i>
+													Reset password
 												</button>
 											)}
 										</div>

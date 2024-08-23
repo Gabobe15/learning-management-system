@@ -8,8 +8,9 @@ import Toast from '../plugin/Toast';
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 import { ProfileContext } from '../plugin/Context';
+import { NavLink } from 'react-router-dom';
 
-function Profile() {
+function Profile({ currentUser }) {
 	const [profile, setProfile] = useContext(ProfileContext);
 	const [profileData, setProfileData] = useState({
 		image: '',
@@ -78,15 +79,15 @@ function Profile() {
 				},
 			})
 			.then((res) => {
-				setProfile(res.data)
+				setProfile(res.data);
 				Toast().fire({
 					icon: 'success',
-					title: 'Profile updated successfully.'
-				})
+					title: 'Profile updated successfully.',
+				});
 			});
 	};
 
-	return (
+	return currentUser === 'student' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -108,7 +109,7 @@ function Profile() {
 									</p>
 								</div>
 								{/* Card body */}
-								<form className="card-body"  onSubmit={handleFormSubmit}>
+								<form className="card-body" onSubmit={handleFormSubmit}>
 									<div className="d-lg-flex align-items-center justify-content-between">
 										<div className="d-flex align-items-center mb-4 mb-lg-0">
 											<img
@@ -195,7 +196,7 @@ function Profile() {
 													className="form-control"
 													placeholder="Country"
 													required=""
-													name='country'
+													name="country"
 													onChange={handleProfileChange}
 													value={profileData.country}
 												/>
@@ -220,6 +221,10 @@ function Profile() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

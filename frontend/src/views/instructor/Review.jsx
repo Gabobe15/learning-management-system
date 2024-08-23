@@ -13,8 +13,9 @@ import Toast from '../plugin/Toast';
 import { userId } from '../../utils/constant';
 import UserData from '../plugin/UserData';
 import apiInstance from '../../utils/axios';
+import { NavLink } from 'react-router-dom';
 
-function Review() {
+function Review({ currentUser }) {
 	const [reviews, setReviews] = useState([]);
 	const [reply, setReply] = useState('');
 	const [filteredReviews, setFilteredReview] = useState([]);
@@ -83,7 +84,7 @@ function Review() {
 		}
 	};
 
-	return (
+	return currentUser === 'teacher' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -167,7 +168,9 @@ function Review() {
 													<div className="ms-3 mt-2">
 														<div className="d-flex align-items-center justify-content-between">
 															<div>
-																<h4 className="mb-0">{r?.profile?.full_name}</h4>
+																<h4 className="mb-0">
+																	{r?.profile?.full_name}
+																</h4>
 																<span>
 																	{moment(r?.date)?.format('DD MMM, YYYY')}
 																</span>
@@ -267,6 +270,10 @@ function Review() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

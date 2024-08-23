@@ -8,11 +8,11 @@ import BaseFooter from '../partials/BaseFooter';
 
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { userId } from '../../utils/constant';
 import Toast from '../plugin/Toast';
 
-function Courses() {
+function Courses({ currentUser }) {
 	const [courses, setCourses] = useState([]);
 
 	const fetchCourseData = () => {
@@ -53,7 +53,7 @@ function Courses() {
 			});
 	};
 
-	return (
+	return currentUser === 'teacher' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -204,6 +204,10 @@ function Courses() {
 			</section>
 
 			<BaseFooter />
+		</>
+	) : (
+		<>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
 		</>
 	);
 }

@@ -38,7 +38,6 @@ function CourseDetail() {
 	const [cartCount, setCartCount] = useContext(CartContext);
 	const country = GetCurrentAddress()?.country;
 	const userId = UserData()?.user_id;
-	// console.log(userId);
 	const params = useParams();
 	const [course, setCourse] = useState([]);
 	const [reviews, setReviews] = useState([]);
@@ -77,7 +76,6 @@ function CourseDetail() {
 			await useAxios()
 				.post(`course/cart/`, formdata)
 				.then((res) => {
-					console.log(res.data);
 					setAddToCartBtn('Added To Cart');
 					// Swal.fire({
 					// 	icon: 'success',
@@ -91,7 +89,7 @@ function CourseDetail() {
 
 					// set cart count after adding to cart -- give me the updated cart count
 					apiInstance
-						.get(`course/cart-list/${CartId()}`)
+						.get(`course/cart-list/${CartId()}/${UserData()?.user_id}/`)
 						.then((res) => setCartCount(res.data?.length));
 				});
 		} catch (error) {
@@ -100,7 +98,6 @@ function CourseDetail() {
 		}
 	};
 
-	console.log(reviews);
 
 	return (
 		<>

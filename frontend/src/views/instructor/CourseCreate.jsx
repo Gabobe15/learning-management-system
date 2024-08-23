@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
@@ -12,7 +12,7 @@ import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 import Swal from 'sweetalert2';
 
-function CourseCreate() {
+function CourseCreate({ currentUser }) {
 	const [course, setCourse] = useState({
 		category: 0,
 		file: '',
@@ -187,7 +187,7 @@ function CourseCreate() {
 		});
 	};
 
-	return (
+	return currentUser === 'teacher' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -519,6 +519,10 @@ function CourseCreate() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

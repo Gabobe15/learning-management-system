@@ -9,9 +9,10 @@ import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 
 import useAxios from '../../utils/useAxios';
-import {userId } from '../../utils/constant';
+import { userId } from '../../utils/constant';
+import { NavLink } from 'react-router-dom';
 
-function Students() {
+function Students({ currentUser }) {
 	const [students, setStudents] = useState([]);
 	useEffect(() => {
 		useAxios()
@@ -19,9 +20,8 @@ function Students() {
 			.then((res) => {
 				setStudents(res.data);
 			});
-
-	},[]);
-	return (
+	}, []);
+	return currentUser === 'teacher' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -70,7 +70,9 @@ function Students() {
 												</div>
 												<div className="d-flex justify-content-between py-2 mt-4 fs-6">
 													<span>Enrolled</span>
-													<span className="text-dark">{moment(s.date).format('DD MMM, YYYY')}</span>
+													<span className="text-dark">
+														{moment(s.date).format('DD MMM, YYYY')}
+													</span>
 												</div>
 											</div>
 										</div>
@@ -84,6 +86,10 @@ function Students() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

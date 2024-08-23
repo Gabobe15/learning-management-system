@@ -55,6 +55,8 @@ NOTI_TYPE = (
     ('Course Enrollment Completed', 'Course Enrollment Completed'),
 )
 
+
+
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) # teacher can have only one account unless registering with different email
     image = models.FileField(upload_to='course-file', blank=True, null=True, default='default.jpg')
@@ -339,7 +341,7 @@ class Note(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     title = models.CharField(max_length=1000, null=True, blank=True)
-    note = models.TextField()
+    note = models.TextField( null=True, blank=True)
     note_id =  ShortUUIDField(unique=True, length=6, max_length=20, alphabet='1234567890')
     date = models.DateTimeField(default=timezone.now)
     

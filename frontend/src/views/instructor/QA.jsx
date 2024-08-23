@@ -9,8 +9,9 @@ import BaseFooter from '../partials/BaseFooter';
 
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
+import { NavLink } from 'react-router-dom';
 
-function QA() {
+function QA({ currentUser }) {
 	const [questions, setQuestions] = useState([]);
 	const [selectedConversation, setSelectedConversation] = useState(null);
 	const lastElementRef = useRef();
@@ -79,7 +80,7 @@ function QA() {
 		}
 	};
 
-	return (
+	return currentUser === 'teacher' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -258,6 +259,10 @@ function QA() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

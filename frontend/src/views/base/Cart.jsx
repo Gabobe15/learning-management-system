@@ -8,16 +8,17 @@ import apiInstance from '../../utils/axios';
 
 import CartId from '../plugin/CartId';
 
-
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import Toast from '../plugin/Toast';
 import { userId } from '../../utils/constant';
+import UserData from '../plugin/UserData';
 
 function Cart() {
 	const [cartCount, setCartCount] = useContext(CartContext);
 	const [cart, setCart] = useState([]);
 	const [cartStats, setCartStats] = useState([]);
+	const user_id = UserData()?.user_id;
 
 	const navigate = useNavigate();
 
@@ -29,15 +30,19 @@ function Cart() {
 
 	const fetchChartItem = async () => {
 		try {
-			await apiInstance.get(`course/cart-list/${CartId()}/`).then((res) => {
-				console.log(res.data);
-				setCart(res.data);
-			});
+			await apiInstance
+				.get(`course/cart-list/${CartId()}/${UserData()?.user_id}/`)
+				.then((res) => {
+					console.log(res.data);
+					setCart(res.data);
+				});
 
-			await apiInstance.get(`cart/stats/${CartId()}/`).then((res) => {
-				console.log(res.data);
-				setCartStats(res.data);
-			});
+			await apiInstance
+				.get(`cart/stats/${CartId()}/${UserData()?.user_id}/`)
+				.then((res) => {
+					console.log(res.data);
+					setCartStats(res.data);
+				});
 		} catch (error) {
 			console.log(error);
 		}
@@ -59,7 +64,7 @@ function Cart() {
 					title: 'Cart Item Delete',
 				});
 				apiInstance
-					.get(`course/cart-list/${CartId()}/`)
+					.get(`course/cart-list/${CartId()}/${UserData()?.user_id}/`)
 					.then((res) => setCartCount(res.data?.length));
 			});
 	};

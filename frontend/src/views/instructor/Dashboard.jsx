@@ -9,10 +9,10 @@ import BaseFooter from '../partials/BaseFooter';
 import useAxios from '../../utils/useAxios';
 // import UserData from '../plugin/UserData';
 import { userId } from '../../utils/constant';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import Toast from '../plugin/Toast';
 
-function Dashboard() {
+function Dashboard({ currentUser }) {
 	const [stats, setStats] = useState([]);
 	const [courses, setCourses] = useState([]);
 
@@ -52,7 +52,7 @@ function Dashboard() {
 			.delete(`teacher/course-detail/${courseId}/`)
 			.then((res) => {
 				console.log(courseId);
-				fetchCourseData()
+				fetchCourseData();
 				Toast().fire({
 					icon: 'success',
 					title: 'course deleted',
@@ -60,7 +60,7 @@ function Dashboard() {
 			});
 	};
 
-	return (
+	return currentUser === 'teacher' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -262,6 +262,10 @@ function Dashboard() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

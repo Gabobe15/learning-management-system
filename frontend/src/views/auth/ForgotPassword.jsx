@@ -3,24 +3,30 @@ import apiInstance from '../../utils/axios';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import Toast from '../plugin/Toast';
+import { useNavigate } from 'react-router-dom';
 // import { Link } from 'react-router-dom';
 
 function ForgotPassword() {
 	const [email, setEmail] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
+	const navigate = useNavigate();
 
 	const handleEmailSubmit = async (e) => {
 		e.preventDefault();
 		setIsLoading(true);
 		try {
-			await apiInstance.get(`user/password-reset/${email}/`).then((res) => {
-				console.log(res.data);
-				setIsLoading(false);
-				Toast().fire({
-					title: 'Password Reset Email Sent',
-					icon: 'success',
+			await apiInstance
+				.post(`user/password-reset/`, {
+					email: email,
+				})
+				.then((res) => {
+					console.log(res.data);
+					setIsLoading(false);
+					Toast().fire({
+						title: 'Password Reset Email Sent',
+						icon: 'success',
+					});
 				});
-			});
 		} catch (error) {
 			console.log('error', error);
 			setIsLoading(false);
@@ -62,7 +68,6 @@ function ForgotPassword() {
 											required=""
 										/>
 									</div>
-
 									<div>
 										<div className="d-grid">
 											{isLoading === true && (
@@ -87,7 +92,6 @@ function ForgotPassword() {
 					</div>
 				</div>
 			</section>
-
 			<BaseFooter />
 		</>
 	);

@@ -23,11 +23,22 @@ export const login = async (email, password) => {
 	}
 };
 
-export const register = async (full_name, email, password, password2) => {
+export const register = async (
+	full_name,
+	email,
+	tel_no,
+	sex,
+	role,
+	password,
+	password2
+) => {
 	try {
 		const { data } = await axios.post(`user/register/`, {
 			full_name,
 			email,
+			tel_no,
+			sex,
+			role,
 			password,
 			password2,
 		});
@@ -44,6 +55,8 @@ export const register = async (full_name, email, password, password2) => {
 export const logout = () => {
 	Cookie.remove('access_token');
 	Cookie.remove('refresh_token');
+	localStorage.removeItem('role');
+	localStorage.removeItem('randomString');
 	useAuthStore.getState().setUser(null);
 };
 
@@ -80,6 +93,7 @@ export const setAuthUser = (access_token, refresh_token) => {
 
 	if (user) {
 		useAuthStore.getState().setUser(user);
+		localStorage.setItem('role', user.role);
 	}
 	// else
 	useAuthStore.getState().setLoading(false);
@@ -96,7 +110,7 @@ export const getRefreshToken = async () => {
 export const isAccessTokenExpired = (access_token) => {
 	try {
 		const decodeToken = jwt_decode(access_token);
-		// check if the token is expired 
+		// check if the token is expired
 		return decodeToken.exp < Date.now() / 1000;
 	} catch (error) {
 		console.log(error);

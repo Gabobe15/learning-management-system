@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 import requests
 from django.contrib.auth.hashers import check_password
+from rest_framework import exceptions
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -12,19 +13,27 @@ import decimal
 from django.db import models
 from distutils.util import strtobool
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.mail import send_mail
+from django.utils.html import format_html
+
+import datetime, random, string
+import pytz
 
 
 
 from api import serializers as api_serializer 
-from userauths.models import Profile, User
+from userauths.models import Profile, User,Reset
+
 
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, status, viewsets, permissions
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import AuthenticationFailed
 
 
 from datetime import timedelta, datetime
@@ -33,8 +42,8 @@ from datetime import timedelta, datetime
 import stripe 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-PAYPAL_CLIENT_ID = settings.PAYPAL_CLIENT_ID
-PAYPAL_SECRET_ID = settings.PAYPAL_SECRET_ID
+PAYPAL_CLIENT_ID = "ATIIsmMXUaOJHQf2ZjsffSF1q17cSBmp57NhBTDlX4asf5wfqawNmUI0sc14HHsA_mroSTcJqd61EL9Q"
+PAYPAL_SECRET_ID = "EFOROZ8w4x4pVaYK2ibkKcKVN4GYhuO4igKphq4JPLItXhS5VffPwsnUloKCtCXgPx3NPjSmGdatnmja"
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -49,68 +58,224 @@ class RegisterView(generics.CreateAPIView):
 def generate_random_otp(length=7):
     otp = ''.join([str(random.randint(0, 9)) for _ in range(length)])
     return otp
-    
-class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = api_serializer.UserSerializer
-    
-    def get_object(self):
-        email = self.kwargs['email'] #we retrieving email from url api/users/token/gabobe@gmail.com
+
+
+
+class ForgotAPIView(APIView):
+    def post(self, request):
+        email = request.data['email']
+        token = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(10))
+
+        Reset.objects.create(
+            email=email,
+            token=token
+        )
+
+        # url = 'http://localhost:5173/reset/' + token
+        reset_link = f"http://localhost:5173/user/reset/{token}"
+        message = f"Click the following link to reset your password: {reset_link}"
+        subject='Reset your password!'
+        from_email = settings.FROM_EMAIL
+        recipient_list=[email]
         
-        user = User.objects.filter(email=email).first()
-        
-        if user: # we are looking if user exists
-            uuidb64 = user.pk
-            refresh = RefreshToken.for_user(user)
-            refresh_token = str(refresh.access_token)
-            
-            user.refresh_token = refresh_token
-            user.otp = generate_random_otp()
-            user.save()
-            
-            link = f"http://localhost:5173/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
-            
-            context = {
-                "link": link,
-                "username": user.username
-            }
-            
-            subject = "Password Reset Email"
-            text_body = render_to_string("email/password_reset.txt", context)
-            html_body = render_to_string("email/password_reset.html", context)
-            
-            msg = EmailMultiAlternatives(
-                subject=subject,
-                from_email=settings.FROM_EMAIL,
-                to=[user.email],
-                body=text_body
-            )
-            
-            msg.attach_alternative(html_body, "text/html")
-            msg.send()
-            
-            print(f"link =====", link)
-            
-        return user
-    
-class PasswordChangeAPIView(generics.CreateAPIView):
-    serializer_class = api_serializer.UserSerializer
-    permission_classes = [AllowAny]
-    
-    def create(self, request, *args, **kwargs):
-        otp = request.data['otp']
-        uuidb64 = request.data['uuidb64']
+        send_mail(
+            subject,
+            message,  # Plain text content
+            from_email,
+            recipient_list,
+        )
+
+        return Response({
+            'message': 'please check your email.'
+        })
+
+
+class ResetAPIView(APIView):
+    def post(self, request):
+        data = request.data
         password = request.data['password']
+
+        reset_password = Reset.objects.filter(token=data['token']).first()
+
+        if not reset_password:
+            raise exceptions.APIException('Invalid link!')
+
+        user = User.objects.filter(email=reset_password.email).first()
+
+        if not user:
+            raise exceptions.APIException('User not found!')
+
+        user.set_password(password)
+        user.save()
+
+        return Response({
+            'message': 'success'
+        })
+
+
+# Forgot password
+# class ForgotPasswordAPIView(APIView):
+#     permission_classes = [
+#         permissions.AllowAny,
+#     ]
+
+#     def post(self, request):
+#         email = request.data['email']
+#         token = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
+
+#         PasswordReset.objects.create(email=email, token=token)
+
+#         send_mail(
+#             subject='Reset your password!',
+#             message='Click <a href="https://www.locahost:5173/reset-password/' + token + '">here</a> to reset your password!',
+#             from_email=settings.EMAIL_HOST_USER,
+#             recipient_list=[email]
+#         )
+
+#         return Response ({
+#             'message': 'Please check your email!'
+#         })
         
-        user = User.objects.filter(id=uuidb64, otp=otp)
-        if user:
-            user.set_password(password)
-            user.otp = ''
-            user.save()
+        
+# Verify token
+# class VerifyTokenAPIView(generics.RetrieveAPIView):
+#     permission_classes = [
+#         permissions.AllowAny,
+#     ]
+
+#     def retrieve(self, request, *args, **kwargs):
+#         token = kwargs['token']
+
+#         tokenObj = PasswordReset.objects.filter(token=token).first()
+
+#         if not tokenObj:
+#             raise AuthenticationFailed('Token not found!')
+
+#         if tokenObj.status == 'used':
+#             raise AuthenticationFailed('Token used!')
+
+#         utc_now = datetime.datetime.utcnow()
+#         utc_now = utc_now.replace(tzinfo=pytz.utc)
+
+#         if tokenObj.date_created < utc_now - datetime.timedelta(hours=1):
+#             raise AuthenticationFailed('Token has expired!')
+        
+#         return Response({
+#             'message': 'Token is valid!'
+#         })
+
+
+# class ResetPasswordAPIView(APIView):
+#     permission_classes = [
+#         permissions.AllowAny,
+#     ]
+
+#     def post(self, request):
+#         data = request.data
+        
+#         passwordReset = PasswordReset.objects.filter(token=data['token']).first()
+
+#         user = User.objects.filter(email=passwordReset.email).first()
+
+#         if not user:
+#             raise AuthenticationFailed('User not found!')
+
+#         user.set_password(data['password'])
+#         user.save()
+
+#         passwordReset.status = 'used'
+#         passwordReset.save()
+
+#         return Response({
+#             'message': 'Password changed successfully.'
+#         })
+    
+# class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
+#     permission_classes = [AllowAny]
+#     serializer_class = api_serializer.UserSerializer
+    
+#     def get_object(self):
+#         email = self.kwargs['email']
+#         #we retrieving email from url api/users/token/gabobe@gmail.com
+        
+#         # email = request.data['email']
+        
+#         otp=generate_random_otp()
+
+#         PasswordResetOTP.objects.create(email=email, otp=otp)
+        
+#         user = User.objects.filter(email=email).first()
+        
+#         if user: # we are looking if user exists
+#             user.otp = otp
+#             user.save()
             
-            return Response({"message":"Password changed successfully."}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"message":" user does not exits."}, status=status.HTTP_404_NOT_FOUND)
+#             context = {
+#                 "otp": user.otp,
+#                 "username": user.username
+#             }
+            
+#             subject = "Password Reset Email"
+#             text_body = render_to_string("email/password_reset.txt", context)
+#             html_body = render_to_string("email/password_reset.html", context)
+            
+#             msg = EmailMultiAlternatives(
+#                 subject=subject,
+#                 from_email=settings.FROM_EMAIL,
+#                 to=[user.email],
+#                 body=text_body
+#             )
+            
+#             msg.attach_alternative(html_body, "text/html")
+#             msg.send()
+            
+#             print(f"otp =====", user.otp)
+            
+#         return user
+ 
+# verify oto
+# class VerifyOTPAPIView(APIView):
+#     permission_classes = [
+#         permissions.AllowAny,
+#     ]
+
+#     def post(self, request):
+#         data = request.data
+        
+#         passwordResetOTP = PasswordResetOTP.objects.filter(otp=data['otp']).first()
+#         # check if otp expired
+#         # check if otp is used
+#         # else redirect to reset password form in the frontend
+
+#         if not passwordResetOTP:
+#             raise AuthenticationFailed('OTP not found!')
+
+#         passwordResetOTP.status = 'used'
+#         passwordResetOTP.save()
+
+#         return Response({
+#             'message': 'OTP found.'
+#         })
+        
+           
+# class PasswordChangeAPIView(generics.CreateAPIView):
+#     serializer_class = api_serializer.UserSerializer
+#     permission_classes = [AllowAny]
+    
+#     def create(self, request, *args, **kwargs):
+#         otp = request.data['otp']
+#         # uuidb64 = request.data['uuidb64']
+#         password = request.data['password']
+        
+#         user = User.objects.filter(otp=otp)
+#         if user:
+#             user.set_password(password)
+#             user.otp = ''
+#             user.save()
+            
+#             return Response({"message":"Password changed successfully."}, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response({"message":" user does not exits."}, status=status.HTTP_404_NOT_FOUND)
         
 class ChangePasswordAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.UserSerializer
@@ -140,6 +305,89 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
         user_id = self.kwargs['user_id']
         user = User.objects.get(id=user_id)
         return Profile.objects.get(user=user)
+    
+    
+# class RoleSexCreateView(APIView):
+#     def post(self, request, *args, **kwargs):
+#         serializer = RoleSexSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({"message": "RoleSex created successfully"}, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# class RoleSexAPIView(generics.CreateAPIView):
+#     serializer_class = api_serializer.RoleSexSerializer
+#     permission_classes = [AllowAny]
+#     queryset = RoleSex.objects.all()
+
+
+    # def create(self, request, *args, **kwargs):
+    #     sex = request.data['sex']
+    #     role = request.data['role']
+        
+    #     RoleSex.objects.create(
+    #         sex=sex,
+    #         role=role,
+    #     )
+        
+    #     return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+        
+
+# class ListRoleSex(generics.ListAPIView):
+#     queryset = RoleSex.objects.all()
+#     serializer_class = api_serializer.RoleSexSerializer
+#     permission_classes = [AllowAny]
+    
+    # def get_queryset(self):
+    #     user_id = self.kwargs['user_id']
+    #     user = User.objects.get(id=user_id)
+    #     queryset = api_serializer.RoleSex.objects.filter(user=user)
+    #     return queryset 
+    
+    
+    # def get_object(self):
+    #     user_id = self.kwargs['user_id']
+    #     user = User.objects.get(id=user_id)
+    #     return RoleSex.objects.get(user=user)
+    
+    
+        
+    
+    
+# class ProfileAPIView(generics.RetrieveUpdateAPIView):
+#     serializer_class = api_serializer.ProfileSerializer
+#     permission_classes = [AllowAny]
+    
+    # def get_object(self):
+    #     user_id = self.kwargs['user_id']
+    #     user = User.objects.get(id=user_id)
+    #     return RoleSex.objects.get(user=user)    
+    # def get_object(self):
+    #     user_id = self.kwargs['user_id']
+    #     user = User.objects.get(id=user_id)
+    #     return Profile.objects.get(user=user)
+    
+    # def get_queryset(self):
+    #     user_id = self.kwargs['user_id']
+    #     user = User.objects.get(id=user_id)
+    #     queryset = api_serializer.RoleSex.objects.filter(user=user)
+    #     return queryset 
+    
+    # def create(self, request, *args, **kwargs):
+    #     # user_id = request.data['user_id']
+    #     user = User.objects.all()
+    #     RoleSex.objects.create(user=user)
+    #     return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+    
+    
+    # def get_object(self):
+    #     user_id = self.kwargs['user_id']
+    #     user = User.objects.get(id=user_id)
+        
+    #     return RoleSex.objects.get(user=user)
+        
+        
+    # queryset = api_models.RoleSex.objects.all()
         
 class CategoryListView(generics.ListAPIView):
     queryset = api_models.Category.objects.filter(active=True)
@@ -230,7 +478,8 @@ class CartListAPIView(generics.ListAPIView):
     
     def get_queryset(self): #it returns all items that are in this cart
         cart_id = self.kwargs['cart_id']
-        queryset = api_models.Cart.objects.filter(cart_id=cart_id)
+        user_id = self.kwargs['user_id']
+        queryset = api_models.Cart.objects.filter(cart_id=cart_id, user_id=user_id) ##we should also filter by user_id
         return queryset
     
 class CartItemDeleteAPIView(generics.DestroyAPIView): #204 is deleted item status
@@ -250,7 +499,8 @@ class CartStatsAPIView(generics.RetrieveAPIView):
     
     def get_queryset(self):
         cart_id = self.kwargs['cart_id']
-        queryset = api_models.Cart.objects.filter(cart_id=cart_id)
+        user_id = self.kwargs['user_id']
+        queryset = api_models.Cart.objects.filter(cart_id=cart_id, user_id=user_id)
         return queryset 
     
     def get(self, request, *args, **kwargs):

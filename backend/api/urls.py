@@ -8,22 +8,37 @@ urlpatterns = [
     path('user/token/', api_views.MyTokenObtainPairView.as_view()),
     path('user/token/refresh/', TokenRefreshView.as_view()),
     path('user/register/', api_views.RegisterView.as_view()),
-    path('user/password-reset/<email>/', api_views.PasswordResetEmailVerifyAPIView.as_view()),
-    path('user/password-change/', api_views.PasswordChangeAPIView.as_view()),
     path('user/change-password/', api_views.ChangePasswordAPIView.as_view()),
     path('user/profile/<user_id>/', api_views.ProfileAPIView.as_view()),
+    path('user/password-reset/',api_views.ForgotAPIView.as_view() ),
+    path('user/reset/', api_views.ResetAPIView.as_view()),
+    
+    # path('user/password-reset/<email>/', api_views.PasswordResetEmailVerifyAPIView.as_view()),
+    # path('user/password-change/', api_views.PasswordChangeAPIView.as_view()),
+    # path('user/verify-otp/', api_views.VerifyOTPAPIView.as_view() ),
+    # 
+    
+    # path('user/password-reset/', api_views.ForgotPasswordAPIView.as_view(), name="forgot-password"),
+    # path('tokens/', views.TokenListView.as_view(), name="token-list"),
+    # path('verify-token/<slug:token>/', api_views.VerifyTokenAPIView.as_view(), name="verify-token"),
+    # path('user/password-change/', api_views.ResetPasswordAPIView.as_view(), name="reset-password"),
+    
+    # path('user/role-sex/', api_views.RoleSexAPIView.as_view()),
+    # path('list/role-sex/', api_views.ListRoleSex.as_view()),
+    # path('list/role-sex/<user_id>/', api_views.ListRoleSex.as_view()),
+    
     
     #core endpoint
     path('course/category/', api_views.CategoryListView.as_view()),
     path('course/course-list/', api_views.CourseListAPIView.as_view()),
     path('course/course-detail/<course_id>/', api_views.CourseDetailAPIView.as_view()),
     path('course/cart/', api_views.CartAPIView.as_view()),
-    path('course/cart-list/<cart_id>/', api_views.CartListAPIView.as_view()),
+    path('course/cart-list/<cart_id>/<user_id>/', api_views.CartListAPIView.as_view()), #user_id --- should be added
     path('course/cart-item-delete/<cart_id>/<item_id>/', api_views.CartItemDeleteAPIView.as_view()),
     path('course/search/', api_views.SearchCourseAPIView.as_view()),
     
     # cart 
-    path('cart/stats/<cart_id>/', api_views.CartStatsAPIView.as_view()),
+    path('cart/stats/<cart_id>/<user_id>/', api_views.CartStatsAPIView.as_view()), #adding user_id
     
     # order 
     path('order/create-order/', api_views.CreateOrderAPIView.as_view()),

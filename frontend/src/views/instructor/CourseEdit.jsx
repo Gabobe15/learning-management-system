@@ -6,14 +6,14 @@ import Sidebar from './Partials/Header';
 import Header from './Partials/Header';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
-import { Link, useParams } from 'react-router-dom';
+import { Link, NavLink, useParams } from 'react-router-dom';
 
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 import Swal from 'sweetalert2';
 import Toast from '../plugin/Toast';
 
-function CourseEdit() {
+function CourseEdit({ currentUser }) {
 	const [course, setCourse] = useState({
 		category: 0,
 		file: '',
@@ -32,14 +32,12 @@ function CourseEdit() {
 
 	const param = useParams();
 
-
 	const [variants, setVariants] = useState([
 		{
 			title: '',
 			items: [{ title: '', description: '', file: '', preview: false }],
 		},
 	]);
-
 
 	const fetchCourseDetail = () => {
 		useAxios()
@@ -224,7 +222,7 @@ function CourseEdit() {
 		});
 	};
 
-	return (
+	return currentUser === 'teacher' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -390,7 +388,7 @@ function CourseEdit() {
 													onChange={handleCKEditorChange}
 													style={{ height: '400px' }}
 													name="description"
-													value={course?.description || ""}
+													value={course?.description || ''}
 												/>
 												<small>A brief summary of your courses.</small>
 											</div>
@@ -573,6 +571,10 @@ function CourseEdit() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

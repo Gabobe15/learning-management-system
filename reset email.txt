@@ -1,0 +1,45 @@
+class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = api_serializer.UserSerializer
+    
+    def get_object(self):
+        email = self.kwargs['email'] #we retrieving email from url api/users/token/gabobe@gmail.com
+        
+        user = User.objects.filter(email=email).first()
+        
+        if user: # we are looking if user exists
+            # uuidb64 = user.pk
+            # refresh = RefreshToken.for_user(user)
+            # refresh_token = str(refresh.access_token)
+            
+            # user.refresh_token = refresh_token 
+            user.otp = generate_random_otp()
+            user.save()
+            
+            # link = f"http://localhost:5173/create-new-password/?otp={user.otp}&uuidb64={uuidb64}&refresh_token={refresh_token}"
+            
+            
+            context = {
+                # "link": link,
+                "otp": user.otp,
+                "username": user.username
+            }
+            
+            subject = "Password Reset Email"
+            text_body = render_to_string("email/password_reset.txt", context)
+            html_body = render_to_string("email/password_reset.html", context)
+            
+            msg = EmailMultiAlternatives(
+                subject=subject,
+                from_email=settings.FROM_EMAIL,
+                to=[user.email],
+                body=text_body
+            )
+            
+            msg.attach_alternative(html_body, "text/html")
+            msg.send()
+            
+            print(f"otp =====", user.otp)
+            
+        return user
+    

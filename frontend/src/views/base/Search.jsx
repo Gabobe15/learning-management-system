@@ -69,7 +69,7 @@ function Search() {
 
 					// set cart count after adding to cart -- give me the updated cart count
 					apiInstance
-						.get(`course/cart-list/${CartId()}`)
+						.get(`course/cart-list/${CartId()}/${UserData()?.user_id}/`)
 						.then((res) => setCartCount(res.data?.length));
 				});
 		} catch (error) {

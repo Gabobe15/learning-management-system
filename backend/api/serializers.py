@@ -11,7 +11,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         
         token['full_name'] = user.full_name
         token['email'] = user.email
-        token['username'] = user.username
+        token['role'] = user.role
         return token
 
 
@@ -21,7 +21,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User 
-        fields = ['full_name', 'email', 'password', 'password2']
+        # fields = ['full_name','email','password','password2']
+        fields = ['full_name','email','tel_no','sex','role','password','password2']
         
     def validate(self, attr):
         if attr['password'] != attr['password2']:
@@ -32,21 +33,44 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create(
             full_name=validated_data['full_name'],
             email=validated_data['email'],
+            tel_no=validated_data['tel_no'],
+            sex=validated_data['sex'],
+            role=validated_data['role'],
         )
         
-        email_username = user.email.split('@')
-        user.username = email_username
+        # email_username = user.email.split('@')
+        # user.username = email_username
         user.set_password(validated_data['password'])
         user.save()
         
         return user
 
 class ProfileSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = Profile 
         fields = '__all__'
         # fields = ['id','user','image','full_name','country','about','date',
         # ]
+        
+# class RoleSexSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = RoleSex
+#         fields = '__all__'
+    
+#     def __init__(self, *args, **kwargs):
+#         super(ReviewSerializer, self).__init__(*args, **kwargs)
+#         request = self.context.get("request")
+#         if request and request.method == "POST":
+#             self.Meta.depth = 0
+#         else:
+#             self.Meta.depth = 3
+
+# Tokens Serializer
+# class TokenSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = PasswordReset
+#         fields = '__all__'
         
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,13 +88,13 @@ class VariantItemSerializer(serializers.ModelSerializer):
         model = api_models.VariantItem
         fields = '__all__'
         
-    def __init__(self, *args, **kwargs):
-        super(VariantItemSerializer, self).__init__(*args,**kwargs)
-        request = self.context.get('request')
-        if request and request.method == 'POST':
-            self.Meta.depth = 0
-        else:
-            self.Meta.depth = 3
+    # def __init__(self, *args, **kwargs):
+    #     super(VariantItemSerializer, self).__init__(*args,**kwargs)
+    #     request = self.context.get('request')
+    #     if request and request.method == 'POST':
+    #         self.Meta.depth = 0
+    #     else:
+    #         self.Meta.depth = 3
         # fields = ["variant","title","description","file","duration","content_duration","preview","variant_item_id","date",
         # ]
         

@@ -9,8 +9,9 @@ import BaseFooter from '../partials/BaseFooter';
 import useAxios from '../../utils/useAxios';
 import { userId } from '../../utils/constant';
 import UserData from '../plugin/UserData';
+import { NavLink } from 'react-router-dom';
 
-function Earning() {
+function Earning({ currentUser }) {
 	const [stats, setStats] = useState([]);
 	const [earning, setEarning] = useState([]);
 	const [bestSellingCourse, setBestSellingCourse] = useState([]);
@@ -36,7 +37,7 @@ function Earning() {
 				setBestSellingCourse(res.data);
 			});
 	}, []);
-	return (
+	return currentUser === 'teacher' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -205,21 +206,21 @@ function Earning() {
 											{earning?.map((e, index) => (
 												<tr key={index}>
 													<td>
-                                                        {e.month === 1 && "January"}
-                                                        {e.month === 2 && "February"}
-                                                        {e.month === 3 && "March"}
-                                                        {e.month === 4 && "April"}
-                                                        {e.month === 5 && "May"}
-                                                        {e.month === 6 && "June"}
-                                                        {e.month === 7 && "Jully"}
-                                                        {e.month === 8 && "August"}
-                                                        {e.month === 9 && "September"}
-                                                        {e.month === 10 && "October"}
-                                                        {e.month === 11 && "November"}
-                                                        {e.month === 12 && "December"}
-                                                        </td>
+														{e.month === 1 && 'January'}
+														{e.month === 2 && 'February'}
+														{e.month === 3 && 'March'}
+														{e.month === 4 && 'April'}
+														{e.month === 5 && 'May'}
+														{e.month === 6 && 'June'}
+														{e.month === 7 && 'Jully'}
+														{e.month === 8 && 'August'}
+														{e.month === 9 && 'September'}
+														{e.month === 10 && 'October'}
+														{e.month === 11 && 'November'}
+														{e.month === 12 && 'December'}
+													</td>
 													<td>${e?.total_earning?.toFixed(2) || 0}</td>
-                                                    {e?.month ? e.month : "No earning"}
+													{e?.month ? e.month : 'No earning'}
 												</tr>
 											))}
 										</tbody>
@@ -233,6 +234,10 @@ function Earning() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

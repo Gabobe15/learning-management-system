@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useEffect, useState, useContext } from 'react';
 import Rater from 'react-rater';
 
@@ -15,7 +15,7 @@ import { CartContext } from '../plugin/Context';
 
 import GetCurrentAddress from '../plugin/UserCountry';
 
-function Wishlist() {
+function Wishlist({ currentUser }) {
 	const country = GetCurrentAddress()?.country;
 
 	const [wishlist, setWishlist] = useState([]);
@@ -59,7 +59,7 @@ function Wishlist() {
 
 					// set cart count after adding to cart -- give me the updated cart count
 					useAxios()
-						.get(`course/cart-list/${CartId()}`)
+						.get(`course/cart-list/${CartId()}/${UserData()?.user_id}/`)
 						.then((res) => setCartCount(res.data?.length));
 				});
 		} catch (error) {
@@ -84,7 +84,7 @@ function Wishlist() {
 			});
 	};
 
-	return (
+	return currentUser === 'student' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -203,7 +203,9 @@ function Wishlist() {
 												</div>
 											</div>
 										))}
-										{wishlist.length < 1 && (<p className='mt-4 p-3'>No item in wishlist</p>)}
+										{wishlist.length < 1 && (
+											<p className="mt-4 p-3">No item in wishlist</p>
+										)}
 									</div>
 								</div>
 							</div>
@@ -214,6 +216,10 @@ function Wishlist() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 

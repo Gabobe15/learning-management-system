@@ -1,7 +1,11 @@
 import { Route, Routes, BrowserRouter } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-// import PrivateRoute from './layouts/PrivateRoute';
+import PrivateRoute from './layouts/PrivateRoute';
 import MainWrapper from './layouts/MainWrapper';
+
+import jwt_decode from 'jwt-decode';
+import Cookie from 'js-cookie';
+
 import {
 	Login,
 	Register,
@@ -49,22 +53,38 @@ import CourseCreate from './views/instructor/CourseCreate';
 import CourseEdit from './views/instructor/CourseEdit';
 import About from './views/base/About';
 import Contact from './views/base/Contact';
+import RoleSex from './views/auth/RoleSex';
+import VerifyOTP from './views/auth/VerifyOTP';
+
+// const token = Cookie.get('access_token') || null;
+// let role;
+// if (token) {
+// 	role = jwt_decode(token);
+// }
 
 function App() {
 	const [cartCount, setCartCount] = useState(0);
 	const [profile, setProfile] = useState([]);
 
+	// console.log(role?.role);
+
+	const currentUser = localStorage.getItem('role');
+
 	useEffect(() => {
 		apiInstance
-			.get(`course/cart-list/${CartId()}`)
+			.get(`course/cart-list/${CartId()}/${UserData()?.user_id}/`)
 			.then((res) => setCartCount(res.data?.length));
+		// apiInstance
+		// 	.get(`list/role-sex/`)
+		// 	.then((res) => setData(res.data));
 
 		useAxios()
-			.get(`user/profile/${UserData()?.user_id}`)
+			.get(`user/profile/${UserData()?.user_id}/`)
 			.then((res) => {
 				setProfile(res.data);
 			});
 	}, []);
+
 
 	return (
 		<CartContext.Provider value={[cartCount, setCartCount]}>
@@ -77,71 +97,242 @@ function App() {
 							<Route path="/logout/" element={<Logout />} />
 							<Route path="/forgot-password/" element={<ForgotPassword />} />
 							<Route
-								path="/create-new-password/"
+								path="user/reset/:token"
 								element={<CreateNewPassword />}
 							/>
+							<Route path="role-sex/" element={<RoleSex />} />
+							<Route path="verify-otp" element={<VerifyOTP />} />
 
 							{/* Base routes  */}
-							<Route path="/" element={<Index />} />
-							<Route path="/course-detail/:course_id/" element={<CourseDetail />} />
-							<Route path="/cart/" element={<Cart />} />
-							<Route path="/checkout/:order_oid/" element={<Checkout />} />
+							<Route
+								path="/"
+								element={
+									<PrivateRoute>
+										<Index />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/course-detail/:course_id/"
+								element={
+									<PrivateRoute>
+										<CourseDetail />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/cart/"
+								element={
+									<PrivateRoute>
+										<Cart />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/checkout/:order_oid/"
+								element={
+									<PrivateRoute>
+										<Checkout />
+									</PrivateRoute>
+								}
+							/>
 							<Route
 								path="/payment-success/:order_oid/"
-								element={<Success />}
+								element={
+									<PrivateRoute>
+										<Success />
+									</PrivateRoute>
+								}
 							/>
-							<Route path="/search/" element={<Search />} />
+							<Route
+								path="/search/"
+								element={
+									<PrivateRoute>
+										<Search />
+									</PrivateRoute>
+								}
+							/>
 							<Route
 								path="/student/change-password/"
-								element={<SChangePassword />}
+								element={
+									<PrivateRoute>
+										<SChangePassword />
+									</PrivateRoute>
+								}
 							/>
 
-							<Route path="/about-us/" element={<About />} />
-							<Route path="/contact-us/" element={<Contact />} />
+							<Route
+								path="/about-us/"
+								element={
+									<PrivateRoute>
+										<About />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/contact-us/"
+								element={
+									<PrivateRoute>
+										<Contact />
+									</PrivateRoute>
+								}
+							/>
 
 							{/* Student route  */}
 							<Route
 								path="/student/dashboard/"
-								element={<StudentDashboard />}
+								element={
+									<PrivateRoute>
+										<StudentDashboard currentUser={currentUser} />
+									</PrivateRoute>
+								}
 							/>
-							<Route path="/student/courses/" element={<StudentCourses />} />
+							<Route
+								path="/student/courses/"
+								element={
+									<PrivateRoute>
+										<StudentCourses currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
 							<Route
 								path="/student/courses/:enrollment_id/"
-								element={<StudentCourseDetail />}
+								element={
+									<PrivateRoute>
+										<StudentCourseDetail />
+									</PrivateRoute>
+								}
 							/>
-							<Route path="/student/wishlist/" element={<Wishlist />} />
-							<Route path="/student/profile/" element={<StudentProfile />} />
-							<Route path="/student/question-answer/" element={<StudentQA />} />
+							<Route
+								path="/student/wishlist/"
+								element={
+									<PrivateRoute>
+										<Wishlist currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/student/profile/"
+								element={
+									<PrivateRoute>
+										<StudentProfile currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/student/question-answer/"
+								element={
+									<PrivateRoute>
+										<StudentQA currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
 
 							{/* Teacher routes  */}
 							<Route
 								path="/instructor/dashboard/"
-								element={<InstructorDashboard />}
+								element={
+									<PrivateRoute>
+										<InstructorDashboard currentUser={currentUser} />
+									</PrivateRoute>
+								}
 							/>
-							<Route path="/instructor/courses/" element={<Courses />} />
-							<Route path="/instructor/reviews/" element={<Review />} />
-							<Route path="/instructor/students/" element={<Students />} />
-							<Route path="/instructor/earning/" element={<Earning />} />
-							<Route path="/instructor/orders/" element={<Orders />} />
-							<Route path="/instructor/coupon/" element={<Coupon />} />
+							<Route
+								path="/instructor/courses/"
+								element={
+									<PrivateRoute>
+										<Courses currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/instructor/reviews/"
+								element={
+									<PrivateRoute>
+										<Review currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/instructor/students/"
+								element={
+									<PrivateRoute>
+										<Students currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/instructor/earning/"
+								element={
+									<PrivateRoute>
+										<Earning currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/instructor/orders/"
+								element={
+									<PrivateRoute>
+										<Orders currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/instructor/coupon/"
+								element={
+									<PrivateRoute>
+										<Coupon currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
 							<Route
 								path="/instructor/notifications/"
-								element={<TeacherNotification />}
+								element={
+									<PrivateRoute>
+										<TeacherNotification currentUser={currentUser} />
+									</PrivateRoute>
+								}
 							/>
-							<Route path="/instructor/question-answer/" element={<QA />} />
+							<Route
+								path="/instructor/question-answer/"
+								element={
+									<PrivateRoute>
+										<QA currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
 							{/* <Route path="/instructor/quiz/" element={<QADetail />} /> */}
 							<Route
 								path="/instructor/change-password/"
-								element={<InstructorChangePassword />}
+								element={
+									<PrivateRoute>
+										<InstructorChangePassword currentUser={currentUser} />
+									</PrivateRoute>
+								}
 							/>
-							<Route path="/instructor/profile/" element={<IProfile />} />
+							<Route
+								path="/instructor/profile/"
+								element={
+									<PrivateRoute>
+										<IProfile currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
 							<Route
 								path="/instructor/create-course/"
-								element={<CourseCreate />}
+								element={
+									<PrivateRoute>
+										<CourseCreate currentUser={currentUser} />
+									</PrivateRoute>
+								}
 							/>
 							<Route
 								path="/instructor/edit-course/:course_id/"
-								element={<CourseEdit />}
+								element={
+									<PrivateRoute>
+										<CourseEdit currentUser={currentUser} />
+									</PrivateRoute>
+								}
 							/>
 						</Routes>
 					</MainWrapper>

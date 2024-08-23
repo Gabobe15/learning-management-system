@@ -9,8 +9,9 @@ import Toast from '../plugin/Toast';
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 import { ProfileContext } from '../plugin/Context';
+import { NavLink } from 'react-router-dom';
 
-function Profile() {
+function Profile({ currentUser }) {
 	const [profile, setProfile] = useContext(ProfileContext);
 	const [profileData, setProfileData] = useState({
 		image: '',
@@ -87,7 +88,7 @@ function Profile() {
 			});
 	};
 
-	return (
+	return currentUser === 'teacher' || currentUser === 'admin' ? (
 		<>
 			<BaseHeader />
 
@@ -221,6 +222,10 @@ function Profile() {
 
 			<BaseFooter />
 		</>
+	) : (
+		<p>
+			You can not access this page. <NavLink to="/">back to homepage</NavLink>
+		</p>
 	);
 }
 
