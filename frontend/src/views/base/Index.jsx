@@ -21,12 +21,30 @@ import apiInstance from '../../utils/axios';
 function Index() {
 	const [courses, setCourses] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [coupon, setCoupon] = useState([]);
+
+	let role = UserData()?.role;
 
 	const country = GetCurrentAddress()?.country;
 	const userId = UserData()?.user_id;
 	const cartId = CartId();
 
 	const [cartCount, setCartCount] = useContext(CartContext);
+
+	const fetchCoupons = () => {
+		apiInstance
+			.get(`teacher/coupon-list/${UserData()?.user_id}/`)
+			.then((res) => {
+				console.log(res.data);
+				setCoupon(res.data);
+			});
+	};
+
+	useEffect(() => {
+		fetchCoupons();
+	}, []);
+
+	console.log(coupon);
 
 	const fetchCourse = async () => {
 		setIsLoading(true);
@@ -106,8 +124,45 @@ function Index() {
 	return (
 		<>
 			<BaseHeader />
+			{/* {coupon
+				? coupon?.map((item, index) => (
+						<div
+							key={index}
+							className="text-center p-2 bg-dark text-white mt-2 d-flex w-100 justify-content-center align-items-center"
+						>
+							<p>
+								Use this code to save {item.discount}% of the price{' '}
+								<span style={{ color: 'yellow' }}>{item.code}</span>
+							</p>
+						</div>
+					))
+				: null} */}
+
+			{coupon
+				? coupon?.map((item, index) => (
+						<div
+							key={index}
+							style={{ background: '#04213b', fontWeight: '300' }}
+							className="d-flex justify-content-center align-items-center mt-2 w-100 text-white"
+							// Adjust height as needed
+						>
+							<p className="text-center m-0 p-4">
+								Get off your purchase with the code Unlock an exclusive{' '}
+								{item.discount}% discount on your next purchase! Use code{' '}
+								<span
+									style={{ color: 'yellow', fontWeight: '800' }}
+									className="px-2 fs-5"
+								>
+									{item.code}
+								</span>
+								at checkout—don’t miss out on this limited-time offer!
+							</p>
+						</div>
+					))
+				: null}
 
 			<section className="py-lg-8 py-5">
+				{/* {coupon?.map(item => item.coupon)} */}
 				{/* container */}
 				<div className="container my-lg-8">
 					{/* row */}
@@ -418,12 +473,27 @@ function Index() {
 									on Geeks. We provide the tools and skills to teach what you
 									love.
 								</p>
-								<Link
-									to="/instructor/create-course/"
-									className="btn bg-white text-dark fw-bold mt-4"
-								>
-									Start Teaching Today <i className="fas fa-arrow-right"></i>
-								</Link>
+								{role === 'teacher' ? (
+									<Link
+										to="/instructor/create-course/"
+										className="btn bg-white text-dark fw-bold mt-4"
+									>
+										Start Teaching Today <i className="fas fa-arrow-right"></i>
+									</Link>
+								) : (
+									<p
+										className="btn bg-white text-dark fw-bold mt-4"
+										onClick={() =>
+											Toast().fire({
+												icon: 'error',
+												title:
+													'Only instructors are authorized to create a course!!!.',
+											})
+										}
+									>
+										Start Teaching Today <i className="fas fa-arrow-right"></i>
+									</p>
+								)}
 							</div>
 						</div>
 					</div>

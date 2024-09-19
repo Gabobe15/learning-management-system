@@ -8,6 +8,7 @@ function UserData() {
 	if (access_token && refresh_token) {
 		const token = refresh_token;
 		const decoded = jwtDecode(token);
+		// console.log(decoded);
 
 		return decoded;
 	} else {

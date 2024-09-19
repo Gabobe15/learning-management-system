@@ -1,0 +1,52 @@
+.about-us-container {
+  padding: 50px 0;
+}
+
+h1.display-4 {
+  color: #007bff;
+  text-align: left;
+}
+
+.about-us-text {
+  padding: 20px;
+}
+
+.banner-image {
+  width: 100%;
+  height: auto;
+}
+
+p.lead {
+  font-size: 1.2rem;
+  text-align: left;
+}
+
+.card {
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  font-weight: bold;
+}
+
+.card-text {
+  color: #6c757d;
+}
+
+.btn-lg {
+  padding: 15px 30px;
+  font-size: 1.25rem;
+  display: block;
+  margin-top: 20px;
+  text-align: left;
+}
+
+@media (max-width: 991.98px) {
+  .about-us-container {
+    padding: 30px 0;
+  }
+
+  .banner-image {
+    margin-top: 20px;
+  }
+}

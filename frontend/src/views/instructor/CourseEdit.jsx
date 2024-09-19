@@ -3,17 +3,16 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 import Sidebar from './Partials/Header';
-import Header from './Partials/Header';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
-import { Link, NavLink, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 import Swal from 'sweetalert2';
 import Toast from '../plugin/Toast';
 
-function CourseEdit({ currentUser }) {
+function CourseEdit() {
 	const [course, setCourse] = useState({
 		category: 0,
 		file: '',
@@ -24,6 +23,7 @@ function CourseEdit({ currentUser }) {
 		level: '',
 		language: '',
 		teacher_course_status: '',
+		platform_status: '',
 	});
 
 	const [category, setCategory] = useState([]);
@@ -182,6 +182,8 @@ function CourseEdit({ currentUser }) {
 		formdata.append('price', course?.price);
 		formdata.append('level', course?.level);
 		formdata.append('language', course?.language);
+		formdata.append('teacher_course_status', course.teacher_course_status);
+		formdata.append('platform_status', course.platform_status);
 		formdata.append('teacher', parseInt(UserData()?.user_id));
 
 		if (course.file != null || course?.file != '') {
@@ -215,27 +217,27 @@ function CourseEdit({ currentUser }) {
 			`teacher/course-update/${UserData()?.user_id}/${param?.course_id}/`,
 			formdata
 		);
-		console.log(response);
+
 		Swal.fire({
 			icon: 'success',
 			title: 'Course Updated Successfully.',
 		});
 	};
 
-	return currentUser === 'teacher' || currentUser === 'admin' ? (
+	return (
 		<>
 			<BaseHeader />
 
 			<section className="pt-5 pb-5">
 				<div className="container">
 					{/* Header Here */}
-					<Header />
+					{/* <Header /> */}
 					<div className="row mt-0 mt-md-4">
 						{/* Sidebar Here */}
 						<Sidebar />
 						<form className="col-lg-9 col-md-8 col-12" onSubmit={handleSubmit}>
 							<>
-								<section className="py-4 py-lg-6 bg-primary rounded-3">
+								<section className="py-4 py-lg-6 bg-primary rounded-3 mt-3">
 									<div className="container">
 										<div className="row">
 											<div className="offset-lg-1 col-lg-10 col-md-12 col-12">
@@ -380,6 +382,33 @@ function CourseEdit({ currentUser }) {
 													<option value="Arabic">Arabic</option>
 												</select>
 											</div>
+											<div className="mb-3">
+												<select
+													className="form-select"
+													name="teacher_course_status"
+													onChange={handleCourseInputChange}
+												>
+													<option value="">Teacher course status</option>
+													<option value="Draft">Draft</option>
+													<option value="Disabled">Disabled</option>
+													<option value="Published">Published</option>
+												</select>
+											</div>
+											<div className="mb-3">
+												<select
+													className="form-select"
+													name="platform_status"
+													onChange={handleCourseInputChange}
+												>
+													<option value="">platform course status</option>
+													<option value="Review">Review</option>
+													<option value="Rejected">Rejected</option>
+													<option value="Disabled">Disabled</option>
+													<option value="Draft">Draft</option>
+													<option value="Published">Published</option>
+												</select>
+											</div>
+
 											<div className="mb-3">
 												<label className="form-label">Course Description</label>
 												<CKEditor
@@ -571,10 +600,6 @@ function CourseEdit({ currentUser }) {
 
 			<BaseFooter />
 		</>
-	) : (
-		<p>
-			You can not access this page. <NavLink to="/">back to homepage</NavLink>
-		</p>
 	);
 }
 

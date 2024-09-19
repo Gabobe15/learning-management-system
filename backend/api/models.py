@@ -61,7 +61,7 @@ class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) # teacher can have only one account unless registering with different email
     image = models.FileField(upload_to='course-file', blank=True, null=True, default='default.jpg')
     full_name = models.CharField(max_length=100)
-    bio = models.TextField(max_length=100, blank=True, null=True,)
+    bio = models.TextField(blank=True, null=True,)
     facebook = models.URLField(blank=True, null=True,)
     twitter = models.URLField(blank=True, null=True,)
     linkedin = models.URLField(blank=True, null=True,)
@@ -122,7 +122,7 @@ class Course(models.Model):
     
     def save(self, *args, **kwargs):
         if self.slug == "" or self.slug == None:
-            self.slug = slugify(self.title) + str(self.pk)
+            self.slug = slugify(self.title)
         super(Course, self).save(*args, **kwargs)
     
     def students(self): #all student for the course

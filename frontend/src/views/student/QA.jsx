@@ -88,11 +88,11 @@ function QA({ currentUser }) {
 			<section className="pt-5 pb-5">
 				<div className="container">
 					{/* Header Here */}
-					<Header />
+					{/* <Header /> */}
 					<div className="row mt-0 mt-md-4">
 						{/* Sidebar Here */}
 						<Sidebar />
-						<div className="col-lg-9 col-md-8 col-12">
+						<div className="col-lg-9 col-md-8 col-12 mt-5">
 							<h4 className="mb-0 mb-1">
 								{' '}
 								<i className="fas fa-envelope"></i> Question and Answer

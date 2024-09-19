@@ -9,15 +9,18 @@ import BaseFooter from '../partials/BaseFooter';
 import useAxios from '../../utils/useAxios';
 import UserData from '../plugin/UserData';
 import { Link, NavLink } from 'react-router-dom';
-import { userId } from '../../utils/constant';
+// import { userId } from '../../utils/constant';
 import Toast from '../plugin/Toast';
+import { teacherId } from '../../utils/constant';
 
 function Courses({ currentUser }) {
 	const [courses, setCourses] = useState([]);
 
+	console.log(teacherId);
+
 	const fetchCourseData = () => {
 		useAxios()
-			.get(`teacher/course-lists/${userId}/`)
+			.get(`teacher/course-lists/${UserData()?.user_id}/`)
 			.then((res) => {
 				console.log(res.data);
 				setCourses(res.data);

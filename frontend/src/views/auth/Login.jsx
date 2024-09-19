@@ -5,17 +5,18 @@ import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 import { Link, useNavigate } from 'react-router-dom';
 import Toast from '../plugin/Toast';
+import { BsEye, BsEyeSlash } from 'react-icons/bs'; // Import icons
 
 function Login() {
 	const navigate = useNavigate();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
+	const [isPasswordVisible, setIsPasswordVisible] = useState(false); // State to toggle password visibility
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setIsLoading(true);
-		// make a call to backend and get cookie 
 		const { error } = await login(email, password);
 		if (error) {
 			setIsLoading(false);
@@ -23,14 +24,20 @@ function Login() {
 				title: error,
 				icon: 'error',
 			});
-			
 		} else {
 			navigate('/');
 			setIsLoading(false);
 		}
 	};
+
+	// Function to toggle password visibility
+	const togglePasswordVisibility = () => {
+		setIsPasswordVisible(!isPasswordVisible);
+	};
+
 	return (
 		<>
+			<BaseHeader />
 			<section
 				className="container d-flex flex-column vh-100"
 				style={{ marginTop: '150px' }}
@@ -54,7 +61,7 @@ function Login() {
 									noValidate=""
 									onSubmit={handleSubmit}
 								>
-									{/* Username */}
+									{/* Email */}
 									<div className="mb-3">
 										<label htmlFor="email" className="form-label">
 											Email Address
@@ -72,24 +79,35 @@ function Login() {
 											Please enter valid username.
 										</div>
 									</div>
-									{/* Password */}
+
+									{/* Password with Show/Hide Toggle */}
 									<div className="mb-3">
 										<label htmlFor="password" className="form-label">
 											Password
 										</label>
-										<input
-											type="password"
-											id="password"
-											className="form-control"
-											name="password"
-											onChange={(e) => setPassword(e.target.value)}
-											placeholder="**************"
-											required=""
-										/>
+										<div className="input-group">
+											<input
+												type={isPasswordVisible ? 'text' : 'password'}
+												id="password"
+												className="form-control"
+												name="password"
+												onChange={(e) => setPassword(e.target.value)}
+												placeholder="**************"
+												required=""
+											/>
+											<button
+												type="button"
+												className="btn btn-outline-secondary"
+												onClick={togglePasswordVisibility}
+											>
+												{isPasswordVisible ? <BsEyeSlash /> : <BsEye />}
+											</button>
+										</div>
 										<div className="invalid-feedback">
 											Please enter valid password.
 										</div>
 									</div>
+
 									{/* Checkbox */}
 									<div className="d-lg-flex justify-content-between align-items-center mb-4">
 										<div className="form-check">
@@ -110,23 +128,21 @@ function Login() {
 											<Link to="/forgot-password/">Forgot your password?</Link>
 										</div>
 									</div>
-									<div>
-										<div className="d-grid">
-											{isLoading === true && (
-												<button
-													type="submit"
-													disabled
-													className="btn btn-primary"
-												>
-													Processing <i className="fas fa-spinner fa-spin"></i>
-												</button>
-											)}
-											{isLoading === false && (
-												<button type="submit" className="btn btn-primary">
-													Sign in <i className="fas fa-user-plus"></i>
-												</button>
-											)}
-										</div>
+
+									<div className="d-grid">
+										{isLoading ? (
+											<button
+												type="submit"
+												disabled
+												className="btn btn-primary"
+											>
+												Processing <i className="fas fa-spinner fa-spin"></i>
+											</button>
+										) : (
+											<button type="submit" className="btn btn-primary">
+												Sign in <i className="fas fa-user-plus"></i>
+											</button>
+										)}
 									</div>
 								</form>
 							</div>
@@ -134,7 +150,7 @@ function Login() {
 					</div>
 				</div>
 			</section>
-
+			<BaseFooter />
 		</>
 	);
 }

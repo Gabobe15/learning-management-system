@@ -4,15 +4,17 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 import Sidebar from './Partials/Header';
-import Header from './Partials/Header';
+// import Header from './Partials/Header';
 import BaseHeader from '../partials/BaseHeader';
 import BaseFooter from '../partials/BaseFooter';
 
 import useAxios from '../../utils/useAxios';
-import UserData from '../plugin/UserData';
 import Swal from 'sweetalert2';
+import UserData from '../plugin/UserData';
 
 function CourseCreate({ currentUser }) {
+	// UserData()?.user_id = UserData()?.teacher_id;
+
 	const [course, setCourse] = useState({
 		category: 0,
 		file: '',
@@ -23,6 +25,7 @@ function CourseCreate({ currentUser }) {
 		level: '',
 		language: '',
 		teacher_course_status: '',
+		platform_status: '',
 	});
 	const [category, setCategory] = useState([]);
 	const [progress, setProgress] = useState(0);
@@ -39,7 +42,6 @@ function CourseCreate({ currentUser }) {
 		useAxios()
 			.get(`course/category/`)
 			.then((res) => {
-				console.log(res.data);
 				setCategory(res.data);
 			});
 	};
@@ -48,7 +50,7 @@ function CourseCreate({ currentUser }) {
 		fetchData();
 	}, []);
 
-	console.log(category);
+	// console.log(category);
 
 	const handleCourseInputChange = (e) => {
 		setCourse({
@@ -155,7 +157,9 @@ function CourseCreate({ currentUser }) {
 		formdata.append('price', course.price);
 		formdata.append('level', course.level);
 		formdata.append('language', course.language);
-		formdata.append('teacher', parseInt(UserData()?.user_id));
+		formdata.append('teacher_course_status', course.teacher_course_status);
+		formdata.append('platform_status', course.platform_status);
+		formdata.append('teacher', UserData()?.teacher_id);
 		if (course.file != null || course.file != '') {
 			formdata.append('file', course.file || '');
 		}
@@ -179,13 +183,19 @@ function CourseCreate({ currentUser }) {
 			});
 		});
 
-		const response = useAxios().post(`teacher/course-create/`, formdata);
-		console.log((await response).data);
+		await useAxios().post(`teacher/course-create`, formdata);
+		// console.log(response.data);
+		// console.log(formdata);
+
 		Swal.fire({
 			icon: 'success',
 			title: 'Course Created successfully.',
 		});
 	};
+
+
+	console.log(UserData()?.teacher_id);
+	
 
 	return currentUser === 'teacher' || currentUser === 'admin' ? (
 		<>
@@ -194,7 +204,7 @@ function CourseCreate({ currentUser }) {
 			<section className="pt-5 pb-5">
 				<div className="container">
 					{/* Header Here */}
-					<Header />
+					{/* <Header /> */}
 					<div className="row mt-0 mt-md-4">
 						{/* Sidebar Here */}
 						<Sidebar />
@@ -338,6 +348,33 @@ function CourseCreate({ currentUser }) {
 													<option value="English">English</option>
 													<option value="Kiswahili">Kiswahili</option>
 													<option value="Arabic">Arabic</option>
+												</select>
+											</div>
+
+											<div className="mb-3">
+												<select
+													className="form-select"
+													name="teacher_course_status"
+													onChange={handleCourseInputChange}
+												>
+													<option value="">Teacher course status</option>
+													<option value="Draft">Draft</option>
+													<option value="Disabled">Disabled</option>
+													<option value="Published">Published</option>
+												</select>
+											</div>
+											<div className="mb-3">
+												<select
+													className="form-select"
+													name="platform_status"
+													onChange={handleCourseInputChange}
+												>
+													<option value="">platform course status</option>
+													<option value="Review">Review</option>
+													<option value="Rejected">Rejected</option>
+													<option value="Disabled">Disabled</option>
+													<option value="Draft">Draft</option>
+													<option value="Published">Published</option>
 												</select>
 											</div>
 											<div className="mb-3">

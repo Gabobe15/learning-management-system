@@ -53,11 +53,40 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     serializer_class= api_serializer.RegisterSerializer
+ 
+ 
+class ListView(generics.ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = api_serializer.UserSerializer
+    
+    def get_queryset(self):
+        return User.objects.filter(is_superuser=False)
+    
+    
+    
+class CurrentUser(generics.RetrieveUpdateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = api_serializer.UserSerializer
+    
+    def get_object(self):
+        user_id = self.kwargs['user_id']
+        return  User.objects.get(is_superuser=False, id=user_id)
+        
+    
+class UpdateDeleteView(generics.RetrieveUpdateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = api_serializer.UserSerializer
+    
+    def get_object(self):
+        user_id = self.kwargs['user_id']
+        user = User.objects.get(id=user_id)
+        return user
     
     
 def generate_random_otp(length=7):
     otp = ''.join([str(random.randint(0, 9)) for _ in range(length)])
     return otp
+
 
 
 
@@ -112,170 +141,6 @@ class ResetAPIView(APIView):
             'message': 'success'
         })
 
-
-# Forgot password
-# class ForgotPasswordAPIView(APIView):
-#     permission_classes = [
-#         permissions.AllowAny,
-#     ]
-
-#     def post(self, request):
-#         email = request.data['email']
-#         token = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
-
-#         PasswordReset.objects.create(email=email, token=token)
-
-#         send_mail(
-#             subject='Reset your password!',
-#             message='Click <a href="https://www.locahost:5173/reset-password/' + token + '">here</a> to reset your password!',
-#             from_email=settings.EMAIL_HOST_USER,
-#             recipient_list=[email]
-#         )
-
-#         return Response ({
-#             'message': 'Please check your email!'
-#         })
-        
-        
-# Verify token
-# class VerifyTokenAPIView(generics.RetrieveAPIView):
-#     permission_classes = [
-#         permissions.AllowAny,
-#     ]
-
-#     def retrieve(self, request, *args, **kwargs):
-#         token = kwargs['token']
-
-#         tokenObj = PasswordReset.objects.filter(token=token).first()
-
-#         if not tokenObj:
-#             raise AuthenticationFailed('Token not found!')
-
-#         if tokenObj.status == 'used':
-#             raise AuthenticationFailed('Token used!')
-
-#         utc_now = datetime.datetime.utcnow()
-#         utc_now = utc_now.replace(tzinfo=pytz.utc)
-
-#         if tokenObj.date_created < utc_now - datetime.timedelta(hours=1):
-#             raise AuthenticationFailed('Token has expired!')
-        
-#         return Response({
-#             'message': 'Token is valid!'
-#         })
-
-
-# class ResetPasswordAPIView(APIView):
-#     permission_classes = [
-#         permissions.AllowAny,
-#     ]
-
-#     def post(self, request):
-#         data = request.data
-        
-#         passwordReset = PasswordReset.objects.filter(token=data['token']).first()
-
-#         user = User.objects.filter(email=passwordReset.email).first()
-
-#         if not user:
-#             raise AuthenticationFailed('User not found!')
-
-#         user.set_password(data['password'])
-#         user.save()
-
-#         passwordReset.status = 'used'
-#         passwordReset.save()
-
-#         return Response({
-#             'message': 'Password changed successfully.'
-#         })
-    
-# class PasswordResetEmailVerifyAPIView(generics.RetrieveAPIView):
-#     permission_classes = [AllowAny]
-#     serializer_class = api_serializer.UserSerializer
-    
-#     def get_object(self):
-#         email = self.kwargs['email']
-#         #we retrieving email from url api/users/token/gabobe@gmail.com
-        
-#         # email = request.data['email']
-        
-#         otp=generate_random_otp()
-
-#         PasswordResetOTP.objects.create(email=email, otp=otp)
-        
-#         user = User.objects.filter(email=email).first()
-        
-#         if user: # we are looking if user exists
-#             user.otp = otp
-#             user.save()
-            
-#             context = {
-#                 "otp": user.otp,
-#                 "username": user.username
-#             }
-            
-#             subject = "Password Reset Email"
-#             text_body = render_to_string("email/password_reset.txt", context)
-#             html_body = render_to_string("email/password_reset.html", context)
-            
-#             msg = EmailMultiAlternatives(
-#                 subject=subject,
-#                 from_email=settings.FROM_EMAIL,
-#                 to=[user.email],
-#                 body=text_body
-#             )
-            
-#             msg.attach_alternative(html_body, "text/html")
-#             msg.send()
-            
-#             print(f"otp =====", user.otp)
-            
-#         return user
- 
-# verify oto
-# class VerifyOTPAPIView(APIView):
-#     permission_classes = [
-#         permissions.AllowAny,
-#     ]
-
-#     def post(self, request):
-#         data = request.data
-        
-#         passwordResetOTP = PasswordResetOTP.objects.filter(otp=data['otp']).first()
-#         # check if otp expired
-#         # check if otp is used
-#         # else redirect to reset password form in the frontend
-
-#         if not passwordResetOTP:
-#             raise AuthenticationFailed('OTP not found!')
-
-#         passwordResetOTP.status = 'used'
-#         passwordResetOTP.save()
-
-#         return Response({
-#             'message': 'OTP found.'
-#         })
-        
-           
-# class PasswordChangeAPIView(generics.CreateAPIView):
-#     serializer_class = api_serializer.UserSerializer
-#     permission_classes = [AllowAny]
-    
-#     def create(self, request, *args, **kwargs):
-#         otp = request.data['otp']
-#         # uuidb64 = request.data['uuidb64']
-#         password = request.data['password']
-        
-#         user = User.objects.filter(otp=otp)
-#         if user:
-#             user.set_password(password)
-#             user.otp = ''
-#             user.save()
-            
-#             return Response({"message":"Password changed successfully."}, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response({"message":" user does not exits."}, status=status.HTTP_404_NOT_FOUND)
         
 class ChangePasswordAPIView(generics.CreateAPIView):
     serializer_class = api_serializer.UserSerializer
@@ -306,96 +171,49 @@ class ProfileAPIView(generics.RetrieveUpdateAPIView):
         user = User.objects.get(id=user_id)
         return Profile.objects.get(user=user)
     
+
+class ActivateTeacherListView(generics.ListCreateAPIView):
+    queryset = api_models.Teacher.objects.all()
+    serializer_class = api_serializer.ActivateTeacherSerializer
+    permission_classes = [AllowAny]
     
-# class RoleSexCreateView(APIView):
-#     def post(self, request, *args, **kwargs):
-#         serializer = RoleSexSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response({"message": "RoleSex created successfully"}, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-# class RoleSexAPIView(generics.CreateAPIView):
-#     serializer_class = api_serializer.RoleSexSerializer
-#     permission_classes = [AllowAny]
-#     queryset = RoleSex.objects.all()
+class ActivateTeacherDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = api_serializer.ActivateTeacherSerializer
+    permission_classes = [AllowAny]
+    
+    def get_object(self):
+        teacher_id  = self.kwargs['teacher_id']
+        return api_models.Teacher.objects.get(id=teacher_id)
 
 
-    # def create(self, request, *args, **kwargs):
-    #     sex = request.data['sex']
-    #     role = request.data['role']
-        
-    #     RoleSex.objects.create(
-    #         sex=sex,
-    #         role=role,
-    #     )
-        
-    #     return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
-        
-
-# class ListRoleSex(generics.ListAPIView):
-#     queryset = RoleSex.objects.all()
-#     serializer_class = api_serializer.RoleSexSerializer
-#     permission_classes = [AllowAny]
-    
-    # def get_queryset(self):
-    #     user_id = self.kwargs['user_id']
-    #     user = User.objects.get(id=user_id)
-    #     queryset = api_serializer.RoleSex.objects.filter(user=user)
-    #     return queryset 
-    
-    
-    # def get_object(self):
-    #     user_id = self.kwargs['user_id']
-    #     user = User.objects.get(id=user_id)
-    #     return RoleSex.objects.get(user=user)
-    
-    
-        
-    
-    
-# class ProfileAPIView(generics.RetrieveUpdateAPIView):
-#     serializer_class = api_serializer.ProfileSerializer
-#     permission_classes = [AllowAny]
-    
-    # def get_object(self):
-    #     user_id = self.kwargs['user_id']
-    #     user = User.objects.get(id=user_id)
-    #     return RoleSex.objects.get(user=user)    
-    # def get_object(self):
-    #     user_id = self.kwargs['user_id']
-    #     user = User.objects.get(id=user_id)
-    #     return Profile.objects.get(user=user)
-    
-    # def get_queryset(self):
-    #     user_id = self.kwargs['user_id']
-    #     user = User.objects.get(id=user_id)
-    #     queryset = api_serializer.RoleSex.objects.filter(user=user)
-    #     return queryset 
-    
-    # def create(self, request, *args, **kwargs):
-    #     # user_id = request.data['user_id']
-    #     user = User.objects.all()
-    #     RoleSex.objects.create(user=user)
-    #     return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
-    
-    
-    # def get_object(self):
-    #     user_id = self.kwargs['user_id']
-    #     user = User.objects.get(id=user_id)
-        
-    #     return RoleSex.objects.get(user=user)
-        
-        
-    # queryset = api_models.RoleSex.objects.all()
-        
-class CategoryListView(generics.ListAPIView):
+class CategoryListView(generics.ListCreateAPIView):
     queryset = api_models.Category.objects.filter(active=True)
     serializer_class = api_serializer.CategorySerializer
     permission_classes = [AllowAny]
     
+class CategoryDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = api_serializer.CategorySerializer
+    permission_classes = [AllowAny]
+    
+    def get_object(self):
+        category_id  = self.kwargs['category_id']
+        return api_models.Category.objects.get(id=category_id )
+
+
+# class TeacherCouponDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+#     serializer_class = api_serializer.CouponSerializer
+#     permission_classes = [AllowAny]
+    
+#     def get_object(self):
+#         teacher_id = self.kwargs['teacher_id']
+#         coupon_id = self.kwargs['coupon_id']
+#         teacher = api_models.Teacher.objects.get(id=teacher_id)
+#         return api_models.Coupon.objects.get(teacher=teacher, id=coupon_id)
+
+    
 class CourseListAPIView(generics.ListAPIView):
-    queryset = api_models.Course.objects.filter(platform_status='Published', teacher_course_status="Published")
+    queryset = api_models.Course.objects.filter(platform_status='Published', teacher_course_status="Published").order_by('-id')
     serializer_class = api_serializer.CourseSerializer
     permission_classes = [AllowAny]
     
@@ -1242,135 +1060,96 @@ class CourseCreateAPIView(generics.CreateAPIView):
         serializer = serializer_class(data=data, many=True, context={"course_instance": course_instance})
         serializer.is_valid(raise_exception=True)
         serializer.save(course=course_instance)
-        
+
 
 class CourseUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = api_models.Course.objects.all()
     serializer_class = api_serializer.CourseSerializer
-    permission_classes = [AllowAny]    
-   
+    permission_classes = [AllowAny]
+
     def get_object(self):
-        teacher_id = self.kwargs['teacher_id']
-        course_id = self.kwargs['course_id']
-       
-        teacher = api_models.Teacher.objects.get(id=teacher_id)
-        course = api_models.Course.objects.get(course_id=course_id)
-       
+        teacher_id = self.kwargs.get('teacher_id')
+        course_id = self.kwargs.get('course_id')
+        teacher = get_object_or_404(api_models.Teacher, id=teacher_id)
+        course = get_object_or_404(api_models.Course, id=course_id)
         return course
-   
+
     def update(self, request, *args, **kwargs):
         course = self.get_object()
         serializer = self.get_serializer(course, data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         if 'image' in request.data and isinstance(request.data['image'], InMemoryUploadedFile):
             course.image = request.data['image']
-        elif 'image' in request.data and str(request.data['image']) == 'No File':
-            course.image = None 
-        
-        if 'file' in request.data and not str(request.data['file']).startswith("http://"):
+        elif 'image' in request.data and request.data['image'] == 'No File':
+            course.image = None
+
+        if 'file' in request.data and not request.data['file'].startswith("http://"):
             course.file = request.data['file']
-        
-        if 'category' in request.data['category'] and request.data['category'] != 'NaN' and request.data['category'] != "undefined":
-            category = api_models.Category.objects.get(id=request.data['category'])
-            course.category = category 
-        
-        self.perform_update(serializer)    
-        # self.update_variant(course, request.data)
+
+        if 'category' in request.data and request.data['category'] != 'NaN' and request.data['category'] != "undefined":
+            category = get_object_or_404(api_models.Category, id=request.data['category'])
+            course.category = category
+
+        self.perform_update(serializer)
         self.update_variant(course, request.data)
-        
+
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def update_variant(self, course, request_data):
         for key, value in request_data.items():
-            # if key.startswith('variants') and ['variant_title'] in key:
             if key.startswith("variants") and '[variant_title]' in key:
-            
                 index = key.split('[')[1].split(']')[0]
-                title = value 
-                
+                title = value
+
                 id_key = f"variants[{index}][variant_id]"
-                # variant_id = request_data.data.get(id_key)
                 variant_id = request_data.get(id_key)
-                
-                    
+
                 variant_data = {"title": title}
                 item_data_list = []
-                current_item = {}
 
                 for item_key, item_value in request_data.items():
                     if f'variants[{index}][items]' in item_key:
                         field_name = item_key.split('[')[-1].split(']')[0]
                         if field_name == "title":
-                            if current_item:
-                                item_data_list.append(current_item) #
-                            current_item = {} #else we return empty variant object
-                        current_item.update({field_name: item_value}) 
+                            if item_data_list:
+                                item_data_list.append({})
+                            current_item = {}
+
+                        current_item.update({field_name: item_value})
+
                 if current_item:
                     item_data_list.append(current_item)
-                
+
                 existing_variant = course.variant_set.filter(id=variant_id).first()
-                
+
                 if existing_variant:
-                    existing_variant.title = title 
+                    existing_variant.title = title
                     existing_variant.save()
-                    # [1:] means skip the first one 
+
                     for item_data in item_data_list[1:]:
+                        variant_item_id = item_data.get("variant_item_id")
+                        variant_item = api_models.VariantItem.objects.filter(id=variant_item_id).first()
+
+                        if variant_item:
+                            preview_value = item_data.get('preview')
+                            preview = bool(strtobool(str(preview_value))) if preview_value is not None else False
+
+                            if not item_data.get('file') or not item_data.get('file').startswith('http://'):
+                                file = item_data.get('file') if item_data.get('file') != "null" else None
+                                variant_item.title = item_data.get('title')
+                                variant_item.description = item_data.get('description')
+                                variant_item.file = file
+                                variant_item.preview = preview
+                                variant_item.save()
+
+                else:
+                    new_variant = api_models.Variant.objects.create(course=course, title=title)
+
+                    for item_data in item_data_list:
                         preview_value = item_data.get('preview')
                         preview = bool(strtobool(str(preview_value))) if preview_value is not None else False
-                        
-                        variant_item = api_models.VariantItem.objects.filter(variant_item_id=item_data.get("variant_item_id")).first()
-                        
-                        if not str(item_data.get('file')).startswith('http://'):
-                            if item_data.get('file') != "null":
-                                file = item_data.get('file')
-                            else: 
-                                file = None 
-                            
-                            title = item_data.get('title')
-                            description = item_data.get('description')
-                            
-                            if variant_item:
-                                variant_item.title = title 
-                                variant_item.description = description 
-                                variant_item.file = file 
-                                variant_item.preview = preview 
-                            else:
-                                variant_item = api_models.VariantItem.objects.create(
-                                    variant=existing_variant,
-                                    title=title,
-                                    description=description,
-                                    file=file,
-                                    preview=preview
-                                )
-                        
-                        else:
-                            title = item_data.get('title')
-                            description = item_data.get('description')
-                            
-                            if variant_item:
-                                variant_item.title = title 
-                                variant_item.description = description 
-                                variant_item.preview = preview 
-                            else:
-                                variant_item = api_models.VariantItem.objects.create(
-                                    variant=existing_variant,
-                                    title=title,
-                                    description=description,
-                                    preview=preview
-                                )
-                                
-                        variant_item.save()
-                                
-                else:
-                    new_variant = api_models.Variant.objects.create(
-                        course=course, title=title
-                    )    
-                    
-                    for item_data in  item_data_list:
-                        review_value = item_data.get('preview')
-                        preview = bool(strtobool(str(preview_value))) if preview_value is not None else False
-                        
+
                         api_models.VariantItem.objects.create(
                             variant=new_variant,
                             title=item_data.get('title'),
@@ -1378,11 +1157,155 @@ class CourseUpdateAPIView(generics.RetrieveUpdateAPIView):
                             file=item_data.get('file'),
                             preview=preview
                         )
-                        
+
     def save_nested_data(self, course_instance, serializer_class, data):
         serializer = serializer_class(data=data, many=True, context={"course_instance": course_instance})
         serializer.is_valid(raise_exception=True)
-        serializer.save(course=course_instance)
+        serializer.save(course=course_instance)        
+
+
+
+
+
+# class CourseUpdateAPIView(generics.RetrieveUpdateAPIView):
+#     queryset = api_models.Course.objects.all()
+#     serializer_class = api_serializer.CourseSerializer
+#     permission_classes = [AllowAny]    
+   
+#     def get_object(self):
+#         teacher_id = self.kwargs['teacher_id']
+#         course_id = self.kwargs['course_id']
+       
+#         teacher = api_models.Teacher.objects.get(id=teacher_id)
+#         course = api_models.Course.objects.get(course_id=course_id)
+       
+#         return course
+   
+#     def update(self, request, *args, **kwargs):
+#         course = self.get_object()
+#         serializer = self.get_serializer(course, data=request.data)
+#         serializer.is_valid(raise_exception=True)
+        
+#         if 'image' in request.data and isinstance(request.data['image'], InMemoryUploadedFile):
+#             course.image = request.data['image']
+#         elif 'image' in request.data and str(request.data['image']) == 'No File':
+#             course.image = None 
+        
+#         if 'file' in request.data and not str(request.data['file']).startswith("http://"):
+#             course.file = request.data['file']
+        
+#         if 'category' in request.data['category'] and request.data['category'] != 'NaN' and request.data['category'] != "undefined":
+#             category = api_models.Category.objects.get(id=request.data['category'])
+#             course.category = category 
+        
+#         self.perform_update(serializer)    
+#         # self.update_variant(course, request.data)
+#         self.update_variant(course, request.data)
+        
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+#     def update_variant(self, course, request_data):
+#         for key, value in request_data.items():
+#             # if key.startswith('variants') and ['variant_title'] in key:
+#             if key.startswith("variants") and '[variant_title]' in key:
+            
+#                 index = key.split('[')[1].split(']')[0]
+#                 title = value 
+                
+#                 id_key = f"variants[{index}][variant_id]"
+#                 # variant_id = request_data.data.get(id_key)
+#                 variant_id = request_data.get(id_key)
+                
+                    
+#                 variant_data = {"title": title}
+#                 item_data_list = []
+#                 current_item = {}
+
+#                 for item_key, item_value in request_data.items():
+#                     if f'variants[{index}][items]' in item_key:
+#                         field_name = item_key.split('[')[-1].split(']')[0]
+#                         if field_name == "title":
+#                             if current_item:
+#                                 item_data_list.append(current_item) #
+#                             current_item = {} #else we return empty variant object
+#                         current_item.update({field_name: item_value}) 
+#                 if current_item:
+#                     item_data_list.append(current_item)
+                
+#                 existing_variant = course.variant_set.filter(id=variant_id).first()
+                
+#                 if existing_variant:
+#                     existing_variant.title = title 
+#                     existing_variant.save()
+#                     # [1:] means skip the first one 
+#                     for item_data in item_data_list[1:]:
+#                         preview_value = item_data.get('preview')
+#                         preview = bool(strtobool(str(preview_value))) if preview_value is not None else False
+                        
+#                         variant_item = api_models.VariantItem.objects.filter(variant_item_id=item_data.get("variant_item_id")).first()
+                        
+#                         if not str(item_data.get('file')).startswith('http://'):
+#                             if item_data.get('file') != "null":
+#                                 file = item_data.get('file')
+#                             else: 
+#                                 file = None 
+                            
+#                             title = item_data.get('title')
+#                             description = item_data.get('description')
+                            
+#                             if variant_item:
+#                                 variant_item.title = title 
+#                                 variant_item.description = description 
+#                                 variant_item.file = file 
+#                                 variant_item.preview = preview 
+#                             else:
+#                                 variant_item = api_models.VariantItem.objects.create(
+#                                     variant=existing_variant,
+#                                     title=title,
+#                                     description=description,
+#                                     file=file,
+#                                     preview=preview
+#                                 )
+                        
+#                         else:
+#                             title = item_data.get('title')
+#                             description = item_data.get('description')
+                            
+#                             if variant_item:
+#                                 variant_item.title = title 
+#                                 variant_item.description = description 
+#                                 variant_item.preview = preview 
+#                             else:
+#                                 variant_item = api_models.VariantItem.objects.create(
+#                                     variant=existing_variant,
+#                                     title=title,
+#                                     description=description,
+#                                     preview=preview
+#                                 )
+                                
+#                         variant_item.save()
+                                
+#                 else:
+#                     new_variant = api_models.Variant.objects.create(
+#                         course=course, title=title
+#                     )    
+                    
+#                     for item_data in  item_data_list:
+#                         review_value = item_data.get('preview')
+#                         preview = bool(strtobool(str(preview_value))) if preview_value is not None else False
+                        
+#                         api_models.VariantItem.objects.create(
+#                             variant=new_variant,
+#                             title=item_data.get('title'),
+#                             description=item_data.get('description'),
+#                             file=item_data.get('file'),
+#                             preview=preview
+#                         )
+                        
+#     def save_nested_data(self, course_instance, serializer_class, data):
+#         serializer = serializer_class(data=data, many=True, context={"course_instance": course_instance})
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save(course=course_instance)
     
 class CourseDetailAPIView(generics.RetrieveDestroyAPIView):
     serializer_class = api_serializer.CourseSerializer

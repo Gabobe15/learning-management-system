@@ -8,10 +8,15 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        
         token['full_name'] = user.full_name
         token['email'] = user.email
         token['role'] = user.role
+        
+        try:
+            token['teacher_id'] = user.teacher.id
+        except:
+            token['teacher_id'] = 0
+        
         return token
 
 
@@ -53,35 +58,45 @@ class ProfileSerializer(serializers.ModelSerializer):
         # fields = ['id','user','image','full_name','country','about','date',
         # ]
         
-# class RoleSexSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = RoleSex
-#         fields = '__all__'
-    
-#     def __init__(self, *args, **kwargs):
-#         super(ReviewSerializer, self).__init__(*args, **kwargs)
-#         request = self.context.get("request")
-#         if request and request.method == "POST":
-#             self.Meta.depth = 0
-#         else:
-#             self.Meta.depth = 3
-
-# Tokens Serializer
-# class TokenSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = PasswordReset
-#         fields = '__all__'
-        
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User 
-        fields = '__all__'
-        # fields = ["id","username","email", "full_name", "otp","refresh_token"]
-        
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = '__all__'
         model = api_models.Teacher 
+        fields = ["id","user", "image", "full_name", "bio", "facebook", "twitter", "linkedin", "about", "country", "students", "courses", "review"]  
+
+        
+class UserSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()  # Custom field to get image from Profile
+    bio = serializers.SerializerMethodField()
+    about = serializers.SerializerMethodField()
+    class Meta:
+        model = User 
+        fields = ['id', 'first_name', 'last_name', 'full_name','email', 'sex', 'role', 'tel_no', 'is_active', 'image', 'bio', 'about']
+        
+        
+    def get_bio(self,obj):
+        bio = api_models.Teacher.objects.filter(user=obj).first()
+        if bio and bio.bio:
+            return bio.bio 
+        return None
+    
+    def get_about(self,obj):
+        about = api_models.Teacher.objects.filter(user=obj).first()
+        if about and about.about:
+            return about.about 
+        return None
+        
+    def get_image(self, obj):
+        # Access the related Profile and return the image
+        profile = Profile.objects.filter(user=obj).first()  # Assuming a OneToOne or ForeignKey relationship
+        if profile and profile.image:
+            return profile.image.url  # Return the image URL
+        return None  # Return None if no profile or image is found
+        # fields = '__all__'
+        # fields = ["id","username","email", "full_name", "otp","refresh_token"]
+        
+        
+        
+
             
 class VariantItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -118,6 +133,12 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta: 
         fields = ['id','title', 'image', 'slug', 'course_count']
         model = api_models.Category
+        
+                
+class ActivateTeacherSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = api_models.Teacher
+        fields = '__all__'
                 
 class Question_Answer_MessageSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(many=False)
@@ -283,9 +304,9 @@ class CourseSerializer(serializers.ModelSerializer):
     # rating_count = ReviewSerializer()
     # rating_count =  ReviewSerializer()
     class Meta:
-        # fields = '__all__'
-        fields = ["id","category","teacher", "file", "image","title", "description", "price", "language", "level", "platform_status", "teacher_course_status", "featured", "course_id", "slug", "date", "students", "curriculum", "lectures", "average_rating", "rating_count", "reviews"]
         model = api_models.Course
+        fields = '__all__'
+        # fields = ["id","category","teacher", "file", "image","title", "description", "price", "language", "level", "platform_status", "teacher_course_status", "featured", "course_id", "slug", "date", "students", "curriculum", "lectures", "average_rating", "rating_count", "reviews"]
         
     def __init__(self, *args, **kwargs):
         super(CourseSerializer, self).__init__(*args,**kwargs)

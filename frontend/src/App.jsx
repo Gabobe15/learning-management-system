@@ -12,6 +12,7 @@ import {
 	Logout,
 	ForgotPassword,
 	CreateNewPassword,
+	AdminRegister,
 } from './views/auth';
 
 import Index from './views/base/Index';
@@ -43,7 +44,7 @@ import Review from './views/instructor/Review';
 import Students from './views/instructor/Students';
 import Earning from './views/instructor/Earning';
 import Orders from './views/instructor/Orders';
-import Coupon from './views/instructor/Coupon';
+// import Coupon from './views/instructor/Coupon';
 import TeacherNotification from './views/instructor/TeacherNotification';
 import QA from './views/instructor/QA';
 import InstructorChangePassword from './views/instructor/ChangePassword';
@@ -53,8 +54,23 @@ import CourseCreate from './views/instructor/CourseCreate';
 import CourseEdit from './views/instructor/CourseEdit';
 import About from './views/base/About';
 import Contact from './views/base/Contact';
-import RoleSex from './views/auth/RoleSex';
 import VerifyOTP from './views/auth/VerifyOTP';
+
+// Admin
+import AdminDashboard from './views/admin/Dashboard';
+import AdminCourseEdit from './views/admin/CourseEdit';
+// import AllCourses from './views/admin/Courses';
+import Coupon from './views/admin/Coupon';
+
+import TeachersList from './views/admin/TeachersList';
+// import AllStudents from './views/admin/Students';
+// import AllEarning from './views/admin/Earning';
+// import AllOrders from './views/admin/Orders';
+import AdminChangePassword from './views/admin/ChangePassword';
+import AProfile from './views/admin/Profile';
+import SinglePage from './views/admin/SinglePage';
+import CourseCategory from './views/admin/CourseCategory';
+import ActivateTeacher from './views/admin/ActivateTeacher';
 
 // const token = Cookie.get('access_token') || null;
 // let role;
@@ -69,22 +85,19 @@ function App() {
 	// console.log(role?.role);
 
 	const currentUser = localStorage.getItem('role');
+	const id = UserData()?.user_id;
 
 	useEffect(() => {
 		apiInstance
 			.get(`course/cart-list/${CartId()}/${UserData()?.user_id}/`)
 			.then((res) => setCartCount(res.data?.length));
-		// apiInstance
-		// 	.get(`list/role-sex/`)
-		// 	.then((res) => setData(res.data));
-
-		useAxios()
-			.get(`user/profile/${UserData()?.user_id}/`)
-			.then((res) => {
-				setProfile(res.data);
-			});
 	}, []);
 
+	useEffect(() => {
+		apiInstance.get(`user/profile/${UserData()?.user_id}/`).then((res) => {
+			setProfile(res.data);
+		});
+	}, [id]);
 
 	return (
 		<CartContext.Provider value={[cartCount, setCartCount]}>
@@ -96,22 +109,11 @@ function App() {
 							<Route path="/login/" element={<Login />} />
 							<Route path="/logout/" element={<Logout />} />
 							<Route path="/forgot-password/" element={<ForgotPassword />} />
-							<Route
-								path="user/reset/:token"
-								element={<CreateNewPassword />}
-							/>
-							<Route path="role-sex/" element={<RoleSex />} />
+							<Route path="user/reset/:token" element={<CreateNewPassword />} />
 							<Route path="verify-otp" element={<VerifyOTP />} />
 
 							{/* Base routes  */}
-							<Route
-								path="/"
-								element={
-									<PrivateRoute>
-										<Index />
-									</PrivateRoute>
-								}
-							/>
+							<Route path="/" element={<Index />} />
 							<Route
 								path="/course-detail/:course_id/"
 								element={
@@ -161,22 +163,8 @@ function App() {
 								}
 							/>
 
-							<Route
-								path="/about-us/"
-								element={
-									<PrivateRoute>
-										<About />
-									</PrivateRoute>
-								}
-							/>
-							<Route
-								path="/contact-us/"
-								element={
-									<PrivateRoute>
-										<Contact />
-									</PrivateRoute>
-								}
-							/>
+							<Route path="/about-us/" element={<About />} />
+							<Route path="/contact-us/" element={<Contact />} />
 
 							{/* Student route  */}
 							<Route
@@ -277,14 +265,7 @@ function App() {
 									</PrivateRoute>
 								}
 							/>
-							<Route
-								path="/instructor/coupon/"
-								element={
-									<PrivateRoute>
-										<Coupon currentUser={currentUser} />
-									</PrivateRoute>
-								}
-							/>
+
 							<Route
 								path="/instructor/notifications/"
 								element={
@@ -331,6 +312,93 @@ function App() {
 								element={
 									<PrivateRoute>
 										<CourseEdit currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+
+							{/* admin  */}
+
+							<Route
+								path="/admin/dashboard"
+								element={
+									<PrivateRoute>
+										<AdminDashboard currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+
+							<Route
+								path="/admin/register"
+								element={
+									<PrivateRoute>
+										<AdminRegister currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/admin/edit-course/:course_id/"
+								element={
+									<PrivateRoute>
+										<AdminCourseEdit currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/admin/course-categories/"
+								element={
+									<PrivateRoute>
+										<CourseCategory />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/admin/activate-teacher/"
+								element={
+									<PrivateRoute>
+										<ActivateTeacher />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/admin/profile/"
+								element={
+									<PrivateRoute>
+										<AProfile currentUser={currentUser} />
+									</PrivateRoute>
+								}
+							/>
+							<Route
+								path="/admin/coupon/"
+								element={
+									<PrivateRoute>
+										<Coupon />
+									</PrivateRoute>
+								}
+							/>
+
+							<Route
+								path="/admin/instructors"
+								element={
+									<PrivateRoute>
+										<TeachersList />
+									</PrivateRoute>
+								}
+							/>
+
+							<Route
+								path="/admin/single/:id"
+								element={
+									<PrivateRoute>
+										<SinglePage />
+									</PrivateRoute>
+								}
+							/>
+
+							<Route
+								path="/admin/change-password/"
+								element={
+									<PrivateRoute>
+										<AdminChangePassword />
 									</PrivateRoute>
 								}
 							/>

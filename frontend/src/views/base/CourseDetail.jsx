@@ -98,7 +98,6 @@ function CourseDetail() {
 		}
 	};
 
-
 	return (
 		<>
 			<BaseHeader />
@@ -389,25 +388,25 @@ function CourseDetail() {
 														{/* Card START */}
 														<div className="card mb-0 mb-md-4">
 															<div className="row g-0 align-items-center">
-																<div className="col-md-5">
-																	{/* Image */}
+																{/* <div className="col-md-5">
+																	Image
 																	<img
-																		src={course.teacher.image}
+																		src={`http://127.0.0.1:8000${course.teacher.image}`}
+
 																		className="img-fluid rounded-3"
 																		alt="instructor-image"
 																	/>
-																</div>
+																</div> */}
 																<div className="col-md-7">
-																	{/* Card body */}
 																	<div className="card-body">
-																		{/* Title */}
 																		<h3 className="card-title mb-0">
 																			{course?.teacher?.full_name}
 																		</h3>
-																		<p className="mb-2">
+
+																		<p className="mb-2 border">
 																			{course?.teacher.bio}
 																		</p>
-																		{/* Social button */}
+																		{/* Social button
 																		<ul className="list-inline mb-3">
 																			<li className="list-inline-item me-3">
 																				<a
@@ -433,7 +432,7 @@ function CourseDetail() {
 																					<i className="fab fa-linkedin" />
 																				</a>
 																			</li>
-																		</ul>
+																		</ul> */}
 																	</div>
 																</div>
 															</div>

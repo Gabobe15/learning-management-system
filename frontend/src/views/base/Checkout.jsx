@@ -15,9 +15,11 @@ import Toast from '../plugin/Toast';
 import { PAYPAL_CLIENT_ID, userId } from '../../utils/constant';
 
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
+import UserData from '../plugin/UserData';
 
 function Checkout() {
 	const [order, setOrder] = useState([]);
+	const [couponCode, setCouponCode] = useState([]);
 
 	const [coupon, setCoupon] = useState('');
 
@@ -76,6 +78,20 @@ function Checkout() {
 		setPaymentLoading(true);
 		e.target.form.submit();
 	};
+
+	const fetchCoupons = () => {
+		apiInstance
+			.get(`teacher/coupon-list/${UserData()?.user_id}/`)
+			.then((res) => {
+				console.log(res.data);
+				setCouponCode(res.data);
+			});
+	};
+
+	useEffect(() => {
+		fetchCoupons();
+	}, []);
+
 	return (
 		<>
 			<BaseHeader />
@@ -240,10 +256,21 @@ function Checkout() {
 									<div className="shadow p-4 mb-4 rounded-3">
 										<h4 className="mb-4">Order Summary</h4>
 										<div className="mb-4">
-											<div className="d-flex justify-content-between align-items-center">
+											{/* <div className="d-flex justify-content-between align-items-center">
 												<span>Transaction ID</span>
 												<p className="mb-0 h6 fw-light">DES23853</p>
-											</div>
+											</div> */}
+											{couponCode
+												? couponCode?.map((item, index) => (
+														<div
+															key={index}
+															className="d-flex justify-content-between align-items-center mt-2"
+														>
+															<span>COUPON CODE</span>
+															<p className="mb-0 h6">{item.code}</p>
+														</div>
+													))
+												: null}
 										</div>
 
 										<div className="input-group mt-1">

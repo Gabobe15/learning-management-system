@@ -8,25 +8,28 @@ import BaseFooter from '../partials/BaseFooter';
 
 import useAxios from '../../utils/useAxios';
 // import UserData from '../plugin/UserData';
-import { userId } from '../../utils/constant';
+// import { userId } from '../../utils/constant';
 import { Link, NavLink } from 'react-router-dom';
 import Toast from '../plugin/Toast';
+import UserData from '../plugin/UserData';
 
 function Dashboard({ currentUser }) {
 	const [stats, setStats] = useState([]);
 	const [courses, setCourses] = useState([]);
 
+	
 	const fetchCourseData = () => {
 		useAxios()
-			.get(`teacher/summary/${userId}/`)
+			.get(`teacher/summary/${UserData()?.user_id}/`)
 			.then((res) => {
 				setStats(res.data[0]);
 			});
 
 		useAxios()
-			.get(`teacher/course-lists/${userId}/`)
+			.get(`teacher/course-lists/${UserData()?.user_id}/`)
 			.then((res) => {
 				setCourses(res.data);
+				
 			});
 	};
 

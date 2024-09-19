@@ -5,31 +5,35 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     #authentication endpoints
+    
+    # access & refresh 
     path('user/token/', api_views.MyTokenObtainPairView.as_view()),
     path('user/token/refresh/', TokenRefreshView.as_view()),
+    
+    # auth 
     path('user/register/', api_views.RegisterView.as_view()),
+    path('user/update-delete/<user_id>/', api_views.UpdateDeleteView.as_view()),
     path('user/change-password/', api_views.ChangePasswordAPIView.as_view()),
-    path('user/profile/<user_id>/', api_views.ProfileAPIView.as_view()),
     path('user/password-reset/',api_views.ForgotAPIView.as_view() ),
     path('user/reset/', api_views.ResetAPIView.as_view()),
     
-    # path('user/password-reset/<email>/', api_views.PasswordResetEmailVerifyAPIView.as_view()),
-    # path('user/password-change/', api_views.PasswordChangeAPIView.as_view()),
-    # path('user/verify-otp/', api_views.VerifyOTPAPIView.as_view() ),
-    # 
+    # user profile 
+    path('user/profile/<user_id>/', api_views.ProfileAPIView.as_view()),
     
-    # path('user/password-reset/', api_views.ForgotPasswordAPIView.as_view(), name="forgot-password"),
-    # path('tokens/', views.TokenListView.as_view(), name="token-list"),
-    # path('verify-token/<slug:token>/', api_views.VerifyTokenAPIView.as_view(), name="verify-token"),
-    # path('user/password-change/', api_views.ResetPasswordAPIView.as_view(), name="reset-password"),
+    # list users and detail user 
+    path('user/list/', api_views.ListView.as_view()),
+    path('user/current-user/<user_id>/', api_views.CurrentUser.as_view()),
     
-    # path('user/role-sex/', api_views.RoleSexAPIView.as_view()),
-    # path('list/role-sex/', api_views.ListRoleSex.as_view()),
-    # path('list/role-sex/<user_id>/', api_views.ListRoleSex.as_view()),
+    # activate teacher 
+    path('user/activate-teacher/', api_views.ActivateTeacherListView.as_view()),
+    path('user/activate-teacher/<teacher_id>/', api_views.ActivateTeacherDetailAPIView.as_view()),
+
     
     
     #core endpoint
     path('course/category/', api_views.CategoryListView.as_view()),
+    path('course/detail-category/<category_id>/', api_views.CategoryDetailAPIView.as_view()),
+    
     path('course/course-list/', api_views.CourseListAPIView.as_view()),
     path('course/course-detail/<course_id>/', api_views.CourseDetailAPIView.as_view()),
     path('course/cart/', api_views.CartAPIView.as_view()),
@@ -79,7 +83,7 @@ urlpatterns = [
     path('teacher/noti-list/<teacher_id>/', api_views.TeacherNotificationListAPIView.as_view()),
     path('teacher/noti-detail/<teacher_id>/<noti_id>/', api_views.TeacherNotificationDetailAPIView.as_view()),
     # create course 
-    path('teacher/course-create/', api_views.CourseCreateAPIView.as_view()),
+    path('teacher/course-create', api_views.CourseCreateAPIView.as_view()),
     path('teacher/course-update/<teacher_id>/<course_id>/', api_views.CourseUpdateAPIView.as_view()),
     path('teacher/course-detail/<course_id>/', api_views.CourseDetailAPIView.as_view()),
     path('teacher/course-variant-delete/<variant_id>/<teacher_id>/<course_id>/', api_views.CourseVariantDeleteAPIView.as_view()),

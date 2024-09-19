@@ -11,7 +11,7 @@ function Register() {
 	const [email, setEmail] = useState('');
 	const [tel_no, setTel_no] = useState('');
 	const [sex, setSex] = useState('');
-	const [role, setRole] = useState('');
+	const [role, setRole] = useState('student');
 	const [password, setPassword] = useState('');
 	const [password2, setPassword2] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +26,7 @@ function Register() {
 		if (!email) newErrors.email = 'Email is required.';
 		if (!tel_no) newErrors.tel_no = 'Full name is required.';
 		if (!sex) newErrors.sex = 'Sex is required.';
-		if (!role) newErrors.role = 'Role is required.';
+		// if (!role) newErrors.role = 'Role is required.'; 
 		if (!password) newErrors.password = 'Password is required.';
 		if (password !== password2) newErrors.password2 = 'Passwords do not match.';
 
@@ -72,10 +72,7 @@ function Register() {
 		<>
 			<BaseHeader />
 
-			<section
-				className="container d-flex flex-column vh-100"
-				style={{ marginTop: '150px' }}
-			>
+			<section className="container d-flex flex-column vh-90 my-4">
 				<div className="row align-items-center justify-content-center g-0 h-lg-100 py-8">
 					<div className="col-lg-5 col-md-8 py-8 py-xl-0">
 						<div className="card shadow">
@@ -143,12 +140,16 @@ function Register() {
 											onChange={(e) => setTel_no(e.target.value)}
 											className={`form-control ${errors.tel_no ? 'is-invalid' : ''}`}
 											name="tel_no"
-											placeholder="+254 / 07..."
+											placeholder="+254"
 											required=""
 										/>
 										{errors.tel_no && (
 											<div className="invalid-feedback">{errors.tel_no}</div>
 										)}
+										<div className='mt-1 mx-2'>
+
+										<small className='my-3 text-secondary'>start with the country code for example +254 in Kenya</small>
+										</div>
 									</div>
 
 									{/* Sex */}
@@ -194,14 +195,13 @@ function Register() {
 									</div>
 
 									{/* Role */}
-									<div className="mb-3">
+									{/* <div className="mb-3">
 										<label>Role:</label>
 										<select
 											value={role}
 											onChange={(e) => setRole(e.target.value)}
 											className={`form-control w-100 ${errors.role ? 'is-invalid' : ''}`}
 										>
-											<option value=""></option>
 											<option value="student">Student</option>
 											<option value="teacher">Teacher</option>
 											<option value="admin">Admin</option>
@@ -209,7 +209,7 @@ function Register() {
 										{errors.role && (
 											<div className="text-danger">{errors.role}</div>
 										)}
-									</div>
+									</div> */}
 
 									{/* Password */}
 									<div className="mb-3 position-relative">
@@ -292,7 +292,6 @@ function Register() {
 					</div>
 				</div>
 			</section>
-
 			<BaseFooter />
 		</>
 	);

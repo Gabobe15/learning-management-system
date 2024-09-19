@@ -3,3 +3,4 @@ export { default as Logout } from './Logout';
 export { default as Register } from './Register';
 export { default as ForgotPassword } from './ForgotPassword';
 export { default as CreateNewPassword } from './CreateNewPassword';
+export { default as AdminRegister } from './AdminRegister';
